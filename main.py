@@ -1,1 +1,1 @@
-"Version control test"
+print("Version control test")
