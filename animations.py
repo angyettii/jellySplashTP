@@ -23,6 +23,12 @@ def onMousePress(app, mouseX, mouseY):
 def redrawAll(app):
     
     drawBoard(app)
+    
+def makeColors(app):
+    for row in range(app.board):
+        for col in range(app.board[0]):
+            color = randint(1,6) 
+            app.board[row][col] = color
 
 
 def drawBoard(app):
@@ -48,7 +54,10 @@ def drawCell(app, row, col, color):
              fill=color, border='black',
              borderWidth=app.cellBorderWidth)
              
-             
+def rowColToPixel(app, row, col):
+    cellWidth = app.width//app.cols
+    cellHeight = app.height//app.rows
+    return cellWidth*col + cellWidth //2 , cellHeight*row + cellHeight // 2
              
 def getCellLeftTop(app, row, col):
     cellWidth, cellHeight = getCellSize(app)
