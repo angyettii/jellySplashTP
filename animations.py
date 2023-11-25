@@ -1,5 +1,5 @@
 from cmu_graphics import *
-
+from random import randint
 
 def onAppStart(app):
     app.width = 800
@@ -21,20 +21,48 @@ def onMousePress(app, mouseX, mouseY):
     pass
 
 def redrawAll(app):
-    
     drawBoard(app)
+    makeColors(app)
+    for row in range(len(app.board)):
+        for col in range(len(app.board[0])):
+            color = findColor(app, row, col)
+            x, y = rowColToPixel(app, row, col)
+            drawCircle(x, y, (app.boardWidth//app.cols)//2, fill = color, border = 'black')
+
+
+def findColor(app, row, col):
+    val = app.board[row][col]
+
+    if val == 1:
+        return 'purple'
+    
+    elif val == 2:
+        return 'green'
+    
+    elif val == 3:
+        return 'red'
+    
+    elif val == 4:
+        return 'blue'
+    
+    elif val == 5:
+        return 'yellow'
+    
+    elif val == 6:
+        return 'orange'
     
 def makeColors(app):
-    for row in range(app.board):
-        for col in range(app.board[0]):
-            color = randint(1,6) 
-            app.board[row][col] = color
+    for row in range(len(app.board)):
+        for col in range(len(app.board[0])):
+            if app.board[row][col] == None:
+                color = randint(1,6) 
+                app.board[row][col] = color
 
 
 def drawBoard(app):
     for row in range(app.rows):
         for col in range(app.cols):
-            drawCell(app, row, col, app.board[row][col])
+            drawCell(app, row, col)
             
             
             
@@ -47,17 +75,17 @@ def drawBoardBorder(app):
          
            
 
-def drawCell(app, row, col, color):
+def drawCell(app, row, col):
     cellLeft, cellTop = getCellLeftTop(app, row, col)
     cellWidth, cellHeight = getCellSize(app)
     drawRect(cellLeft, cellTop, cellWidth, cellHeight,
-             fill=color, border='black',
+             border='black', fill = None,
              borderWidth=app.cellBorderWidth)
              
 def rowColToPixel(app, row, col):
-    cellWidth = app.width//app.cols
-    cellHeight = app.height//app.rows
-    return cellWidth*col + cellWidth //2 , cellHeight*row + cellHeight // 2
+    cellWidth = app.boardWidth//app.cols
+    cellHeight = app.boardWidth//app.rows
+    return cellWidth*col + cellWidth //2 + (1/10)*app.width, cellHeight*row + cellHeight // 2 + (1/10)*app.height
              
 def getCellLeftTop(app, row, col):
     cellWidth, cellHeight = getCellSize(app)
