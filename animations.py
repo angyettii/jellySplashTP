@@ -21,7 +21,8 @@ def onMousePress(app, mouseX, mouseY):
     pass
 
 def redrawAll(app):
-    drawBoard(app)
+
+    drawGrid(app)
     makeColors(app)
     for row in range(len(app.board)):
         for col in range(len(app.board[0])):
@@ -58,45 +59,49 @@ def makeColors(app):
                 color = randint(1,6) 
                 app.board[row][col] = color
 
+            
+            
 
-def drawBoard(app):
+def drawGrid(app):
+    cellWidth = app.boardWidth//app.cols
+    cellHeight = app.boardHeight//app.rows
     for row in range(app.rows):
         for col in range(app.cols):
-            drawCell(app, row, col)
-            
-            
-            
-def drawBoardBorder(app):
-  # draw the board outline (with double-thickness):
-  drawRect(app.boardLeft, app.boardTop, app.boardWidth, app.boardHeight,
-           fill=None, border='black',
-           borderWidth=2*app.cellBorderWidth)
-           
-         
-           
+          
+            x = app.boardLeft + row*cellWidth
+            y = app.boardTop + col*cellHeight
+            drawRect(x, y, cellWidth, cellHeight, fill = None, border = 'black', borderWidth = 1)
 
-def drawCell(app, row, col):
-    cellLeft, cellTop = getCellLeftTop(app, row, col)
-    cellWidth, cellHeight = getCellSize(app)
-    drawRect(cellLeft, cellTop, cellWidth, cellHeight,
-             border='black', fill = None,
-             borderWidth=app.cellBorderWidth)
+
              
 def rowColToPixel(app, row, col):
     cellWidth = app.boardWidth//app.cols
     cellHeight = app.boardWidth//app.rows
     return cellWidth*col + cellWidth //2 + (1/10)*app.width, cellHeight*row + cellHeight // 2 + (1/10)*app.height
              
-def getCellLeftTop(app, row, col):
-    cellWidth, cellHeight = getCellSize(app)
-    cellLeft = app.boardLeft + col * cellWidth
-    cellTop = app.boardTop + row * cellHeight
-    return (cellLeft, cellTop)
 
-def getCellSize(app):
-    cellWidth = app.boardWidth / app.cols
-    cellHeight = app.boardHeight / app.rows
-    return (cellWidth, cellHeight)
+
+def onKeyPress(app, key):
+    if key == 'r':
+        app.board[0][0] = None
+    if key == 'p':
+        app.board.pop(3)
+    
+        #checks if a row has been popped by user -works
+        if len(app.board) != app.rows:
+            for difference in range(app.rows-len(app.board)):
+                app.board.insert(0, [None]*app.cols)
+
+        #checks for singular units popped by user, inserts empty cell at the top -no
+        
+                
+            
+
+
+            # if len(app.board[row]) != app.cols:
+            #     for difference in range(app.cols-len(app.board[row])):
+            #         app.board[row].insert(0,None)
+    
 
 def main():
     runApp()
