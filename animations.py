@@ -2,10 +2,17 @@ from cmu_graphics import *
 
 
 def onAppStart(app):
-    pass
+    app.width = 800
+    app.height = 800
+    app.rows = 9
+    app.cols = 9
+    app.board = [([None] * app.cols) for row in range(app.rows)]
+    app.boardWidth = (3/4)*app.width
+    app.boardHeight = (3/4)*app.height
+    app.boardLeft = (1/10)*app.width
+    app.boardTop = (1/10)*app.height
+    app.cellBorderWidth = 2
 
-def drawBoard(app):
-    pass
 
 def onMouseDrag(app, mouseX, mouseY):
     pass
@@ -14,6 +21,7 @@ def onMousePress(app, mouseX, mouseY):
     pass
 
 def redrawAll(app):
+    
     drawBoard(app)
 
 
@@ -52,3 +60,8 @@ def getCellSize(app):
     cellWidth = app.boardWidth / app.cols
     cellHeight = app.boardHeight / app.rows
     return (cellWidth, cellHeight)
+
+def main():
+    runApp()
+
+main()
