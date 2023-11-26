@@ -12,10 +12,31 @@ def onAppStart(app):
     app.boardLeft = (1/10)*app.width
     app.boardTop = (1/10)*app.height
     app.cellBorderWidth = 2
+    app.selected = []
+    app.centers = loadCenters(app)
+    app.notSelected = app.centers
 
+def loadCenters(app):
+    L = []
+    for row in range(app.rows):
+        for col in range(app.cols):
+            x, y = row, col
+            L.append(x,y)
+
+    return L
+
+
+def distance(x1, x2, y1, y2):
+    return ((x1-x2)**2 + (y1-y2)**2)**.5
 
 def onMouseDrag(app, mouseX, mouseY):
-    pass
+    
+    for i in range(len(app.notSelected)):
+        #if distance from a center is less than radius 
+        if distance(mouseX, app.notSelected[i][0],
+                    mouseY, app.notSelected[i][1]) < (app.boardWidth//app.cols)//2:
+            pass
+
 
 def onMousePress(app, mouseX, mouseY):
     pass
@@ -85,18 +106,18 @@ def onKeyPress(app, key):
     if key == 'r':
         app.board[0][0] = None
     if key == 'p':
-        app.board.pop(3)
+        app.board[5][4] = 0
+        app.board[5][3] = 0
     
-        #checks if a row has been popped by user -works
-        if len(app.board) != app.rows:
-            for difference in range(app.rows-len(app.board)):
-                app.board.insert(0, [None]*app.cols)
+        for row in range (app.rows-1,-1,-1):
+            for col in range(app.cols):
+                if app.board[row][col] == 0 and row != 0:
+                    app.board[row][col] = app.board[row-1][col]
+                    app.board[row-1][col] = 0
 
-        #checks for singular units popped by user, inserts empty cell at the top -no
-        
-                
-            
-
+                elif app.board[row][col] == 0 and row == 0:
+                    app.board[row][col] = None
+        #call falling after pop 
 
             # if len(app.board[row]) != app.cols:
             #     for difference in range(app.cols-len(app.board[row])):
