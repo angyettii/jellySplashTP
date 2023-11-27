@@ -15,14 +15,15 @@ def onAppStart(app):
     app.selected = []
     app.centers = loadCenters(app)
     app.notSelected = app.centers
+    app.selectedPositions = []
 
 def loadCenters(app):
     L = []
     for row in range(app.rows):
         for col in range(app.cols):
             x, y = row, col
-            L.append(x,y)
-
+            L.append((x,y))
+    print(L)
     return L
 
 
@@ -30,12 +31,50 @@ def distance(x1, x2, y1, y2):
     return ((x1-x2)**2 + (y1-y2)**2)**.5
 
 def onMouseDrag(app, mouseX, mouseY):
+    count = 0
+    while count < len(app.notSelected):
+        #if distance from a center is less than radius, that circle is selected 
+        cxPixel = (rowColToPixel(app, app.notSelected[count][0], app.notSelected[count][1])[0])
+        cyPixel = (rowColToPixel(app, app.notSelected[count][0], app.notSelected[count][1])[1])
+        if distance(mouseX, cxPixel,  mouseY, cyPixel ) < (app.boardWidth//app.cols)//2:
+            #saves the index of the popped element
+            app.selectedPositions.append(count)
+            app.selected.append(app.notSelected.pop(count))
+            
+        #else, move on to the next circle
+        else:
+            count += 1
+
     
-    for i in range(len(app.notSelected)):
-        #if distance from a center is less than radius 
-        if distance(mouseX, app.notSelected[i][0],
-                    mouseY, app.notSelected[i][1]) < (app.boardWidth//app.cols)//2:
-            pass
+def onMouseRelease(app, mouseX, mouseY):
+    
+    if len(app.selected) < 3:
+        pass
+        #empty app.selected back into app.notSelected
+    
+    #length is greater than or equal to 3
+    else:
+        
+        intial = app.board[app.selected[0][0]][app.selected[0][1]]
+        print(intial)
+        for cx, cy in app.selected:
+            
+            if app.board[cx][cy] != intial:
+                for i in range(len(app.selected)-1 , -1, -1):
+                    app.notSelected.insert(app.selectedPositions[i], app.selected.pop(i))
+                
+                break
+                
+            
+            #all the same color 
+        if len(app.selected) != 0:
+            for row, col in app.selected:
+                app.board[row][col] = 0
+
+            for i in range(len(app.selected)-1 , -1, -1):
+                    app.notSelected.insert(app.selectedPositions[i], app.selected.pop(i))
+            
+            #empty app.selected
 
 
 def onMousePress(app, mouseX, mouseY):
@@ -81,7 +120,6 @@ def makeColors(app):
                 app.board[row][col] = color
 
             
-            
 
 def drawGrid(app):
     cellWidth = app.boardWidth//app.cols
@@ -91,24 +129,33 @@ def drawGrid(app):
           
             x = app.boardLeft + row*cellWidth
             y = app.boardTop + col*cellHeight
-            drawRect(x, y, cellWidth, cellHeight, fill = None, border = 'black', borderWidth = 1)
+            drawRect(x, y, cellWidth, cellHeight, 
+                     fill = None, border = 'black', borderWidth = 1)
 
 
              
 def rowColToPixel(app, row, col):
     cellWidth = app.boardWidth//app.cols
     cellHeight = app.boardWidth//app.rows
-    return cellWidth*col + cellWidth //2 + (1/10)*app.width, cellHeight*row + cellHeight // 2 + (1/10)*app.height
-             
-
-
+    return (cellWidth*col + cellWidth //2 + (1/10)*app.width, 
+            cellHeight*row + cellHeight // 2 + (1/10)*app.height)
+ 
 def onKeyPress(app, key):
     if key == 'r':
         app.board[0][0] = None
     if key == 'p':
-        app.board[5][4] = 0
+        app.board[7][0] = 0
         app.board[5][3] = 0
     
+        #call falling after pop 
+
+            # if len(app.board[row]) != app.cols:
+            #     for difference in range(app.cols-len(app.board[row])):
+            #         app.board[row].insert(0,None)
+    
+
+def onStep(app):
+
         for row in range (app.rows-1,-1,-1):
             for col in range(app.cols):
                 if app.board[row][col] == 0 and row != 0:
@@ -117,12 +164,6 @@ def onKeyPress(app, key):
 
                 elif app.board[row][col] == 0 and row == 0:
                     app.board[row][col] = None
-        #call falling after pop 
-
-            # if len(app.board[row]) != app.cols:
-            #     for difference in range(app.cols-len(app.board[row])):
-            #         app.board[row].insert(0,None)
-    
 
 def main():
     runApp()
