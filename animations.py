@@ -9,13 +9,19 @@ def onAppStart(app):
     app.board = [([None] * app.cols) for row in range(app.rows)]
     app.boardWidth = (3/4)*app.width
     app.boardHeight = (3/4)*app.height
-    app.boardLeft = (1/10)*app.width
-    app.boardTop = (1/10)*app.height
+    app.boardLeft = (1/8)*app.width
+    app.boardTop = (1/6)*app.height
     app.cellBorderWidth = 2
     app.selected = []
     app.centers = loadCenters(app)
     app.notSelected = app.centers
     app.selectedPositions = []
+    #what the target jelly is this round 
+    app.targetJelly = randint(1,6)
+
+    app.totalMoves = 20
+    app.userMoves = app.totalMoves
+    app.userScore = 0
 
 def loadCenters(app):
     L = []
@@ -54,8 +60,6 @@ def onMouseDrag(app, mouseX, mouseY):
             
             app.notSelected.insert(app.selectedPositions[len(app.selected)-1], app.selected.pop())
         
-   
-
 def onMouseRelease(app, mouseX, mouseY):
     
     if len(app.selected) < 3:
@@ -81,6 +85,7 @@ def onMouseRelease(app, mouseX, mouseY):
         if len(app.selected) != 0:
             for row, col in app.selected:
                 app.board[row][col] = 0
+            app.userMoves -=1
 
             for i in range(len(app.selected)-1 , -1, -1):
                     app.notSelected.insert(app.selectedPositions[i], app.selected.pop(i))
@@ -105,8 +110,14 @@ def redrawAll(app):
         for col in range(len(app.board[0])):
             color = findColor(app, row, col)
             x, y = rowColToPixel(app, row, col)
-            drawCircle(x, y, (app.boardWidth//app.cols)//3, fill = color, border = 'black')
-
+            drawCircle(x, y, (app.boardWidth//app.cols)//3, 
+                       fill = color, border = 'black')
+            
+    textColor = rgb(133, 90, 35)
+    drawOval(app.width/2, app.height*(1/20), app.width/4, app.height/5, 
+             fill = rgb(244, 206, 157), border = textColor, borderWidth = 10)
+    drawLabel("Moves Left:", app.width/2, app.height*(1/28), size = 20, fill = rgb(97, 63, 19))
+    drawLabel(f'{app.userMoves}', app.width/2, app.height*(1/12), size = 40)
     
 
 
@@ -139,19 +150,24 @@ def makeColors(app):
                 app.board[row][col] = color
 
            
-           
+
 def drawGrid(app):
     cellWidth = app.boardWidth//app.cols
     cellHeight = app.boardHeight//app.rows
     for row in range(app.rows):
         for col in range(app.cols):
-            if abs(row-col)%2 == 0:
+
+            if (row,col) in app.selected:
+                color = rgb(255, 236, 204)
+
+            elif abs(row-col)%2 == 0:
                 color = rgb(222,172,120)
+
             else:
                 color = rgb(234,192,150)
           
-            x = app.boardLeft + row*cellWidth
-            y = app.boardTop + col*cellHeight
+            x = app.boardLeft + col*cellHeight
+            y = app.boardTop + row*cellWidth
             drawRect(x, y, cellWidth, cellHeight, 
                      fill = color)
 
@@ -160,8 +176,8 @@ def drawGrid(app):
 def rowColToPixel(app, row, col):
     cellWidth = app.boardWidth//app.cols
     cellHeight = app.boardWidth//app.rows
-    return (cellWidth*col + cellWidth //2 + (1/10)*app.width, 
-            cellHeight*row + cellHeight // 2 + (1/10)*app.height)
+    return (cellWidth*col + cellWidth //2 + app.boardLeft, 
+            cellHeight*row + cellHeight // 2 + app.boardTop)
  
 def onKeyPress(app, key):
     if key == 'r':
@@ -178,7 +194,7 @@ def onKeyPress(app, key):
     
 
 def onStep(app):
-
+    #'falling'     
     for row in range (app.rows-1,-1,-1):
         for col in range(app.cols):
             if app.board[row][col] == 0 and row != 0:
