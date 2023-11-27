@@ -1,3 +1,5 @@
+from random import randint
+import copy
 
 def solExists(board):
     for row in range(len(board)):
@@ -7,6 +9,7 @@ def solExists(board):
                      return True
                 else:
                      continue
+    return False
 
 
 def solExistsHelper(board, row, col, sol):
@@ -18,8 +21,12 @@ def solExistsHelper(board, row, col, sol):
         for nextRow in range(row-1, row+2):
             for nextCol in range(col-1, col+2):
                  if isValid(board, row, col, nextRow, nextCol, sol):
-                      pass
-                 
+                    sol.append(nextRow, nextCol)
+                    solution = solExistsHelper(board, nextRow, nextCol, sol)
+                    if solution != False:
+                        return True
+                    sol.pop()
+        return False
                 
 
 def isValid(board, row, col, nextRow, nextCol, sol):
@@ -32,3 +39,35 @@ def isValid(board, row, col, nextRow, nextCol, sol):
         (board[nextRow][nextCol]==board[row][col])and
         ((nextRow, nextCol) not in sol)):
         return True
+
+def shuffle(board):
+    #if no solution exists on the current board, need to shuffle
+    #returns board with the same contents, just shuffled and guaranteed 
+    #to have at least 1 solution
+    if solExists(board) == False:
+        boardContents = flatten(copy.deepcopy(board))
+
+        newBoard = [([None] * 9) for row in range(9)]
+
+        for i in range(len(boardContents)-1, -1, -1):
+            for row in range(len(newBoard)):
+                for col in range(len(newBoard[0])):
+                    newBoard[row][col] = boardContents[randint(0,i)]
+
+        if solExists(newBoard):
+            return newBoard
+        else:
+            return shuffle(board)
+
+
+
+def flatten(L):
+    if L == []:
+        return []
+    else:
+        first = L[0]
+        rest = L[1:]
+        if isinstance(first, list):
+            return flatten(first) + flatten(rest)
+        else:
+            return [first] + flatten(rest)
