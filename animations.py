@@ -31,6 +31,7 @@ def distance(x1, x2, y1, y2):
     return ((x1-x2)**2 + (y1-y2)**2)**.5
 
 def onMouseDrag(app, mouseX, mouseY):
+
     count = 0
     while count < len(app.notSelected):
         #if distance from a center is less than radius, that circle is selected 
@@ -45,21 +46,17 @@ def onMouseDrag(app, mouseX, mouseY):
         else:
             count += 1
 
+    #allows user to 'undo' selection
+    if len(app.selected) >=2:
+        ind = len(app.selected) - 2
+        
+        if distance(mouseX, rowColToPixel(app, app.selected[ind][0], app.selected[ind][1])[0], 
+                    mouseY, rowColToPixel(app, app.selected[ind][0], app.selected[ind][1])[1]) < (app.boardWidth//app.cols)//2:
+            print("hi")
+            app.notSelected.insert(app.selectedPositions[len(app.selected)-1], app.selected.pop())
+        
+   
 
-        # otherCount = 0
-        # while otherCount < len(app.selected):
-        # #if distance from a center is less than radius, that circle is selected 
-        #     cxPixel = (rowColToPixel(app, app.selected[count][0], app.selected[count][1])[0])
-        #     cyPixel = (rowColToPixel(app, app.selected[count][0], app.selected[count][1])[1])
-        #     if distance(mouseX, cxPixel,  mouseY, cyPixel ) < (app.boardWidth//app.cols)//2:
-                
-        #         app.notSelected.insert(app.selectedPositions[count], app.selected.pop(count))
-                
-            
-        # #else, move on to the next circle
-        # else:
-        #     otherCount += 1
-    
 def onMouseRelease(app, mouseX, mouseY):
     
     if len(app.selected) < 3:
