@@ -23,7 +23,6 @@ def loadCenters(app):
         for col in range(app.cols):
             x, y = row, col
             L.append((x,y))
-    print(L)
     return L
 
 
@@ -52,7 +51,7 @@ def onMouseDrag(app, mouseX, mouseY):
         
         if distance(mouseX, rowColToPixel(app, app.selected[ind][0], app.selected[ind][1])[0], 
                     mouseY, rowColToPixel(app, app.selected[ind][0], app.selected[ind][1])[1]) < (app.boardWidth//app.cols)//2:
-            print("hi")
+            
             app.notSelected.insert(app.selectedPositions[len(app.selected)-1], app.selected.pop())
         
    
@@ -68,7 +67,7 @@ def onMouseRelease(app, mouseX, mouseY):
     else:
         
         intial = app.board[app.selected[0][0]][app.selected[0][1]]
-        print(intial)
+        
         for cx, cy in app.selected:
             
             if app.board[cx][cy] != intial:
@@ -94,7 +93,6 @@ def onMousePress(app, mouseX, mouseY):
 def redrawAll(app):
 
     drawGrid(app)
-
     
     for i in range(len(app.selected)-1):
        
@@ -140,8 +138,8 @@ def makeColors(app):
                 color = randint(1,6) 
                 app.board[row][col] = color
 
-            
-
+           
+           
 def drawGrid(app):
     cellWidth = app.boardWidth//app.cols
     cellHeight = app.boardHeight//app.rows
