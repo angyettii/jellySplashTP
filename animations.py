@@ -40,17 +40,32 @@ def onMouseDrag(app, mouseX, mouseY):
             #saves the index of the popped element
             app.selectedPositions.append(count)
             app.selected.append(app.notSelected.pop(count))
-            
+        
         #else, move on to the next circle
         else:
             count += 1
 
+
+        # otherCount = 0
+        # while otherCount < len(app.selected):
+        # #if distance from a center is less than radius, that circle is selected 
+        #     cxPixel = (rowColToPixel(app, app.selected[count][0], app.selected[count][1])[0])
+        #     cyPixel = (rowColToPixel(app, app.selected[count][0], app.selected[count][1])[1])
+        #     if distance(mouseX, cxPixel,  mouseY, cyPixel ) < (app.boardWidth//app.cols)//2:
+                
+        #         app.notSelected.insert(app.selectedPositions[count], app.selected.pop(count))
+                
+            
+        # #else, move on to the next circle
+        # else:
+        #     otherCount += 1
     
 def onMouseRelease(app, mouseX, mouseY):
     
     if len(app.selected) < 3:
-        pass
-        #empty app.selected back into app.notSelected
+        for i in range(len(app.selected)-1 , -1, -1):
+                    app.notSelected.insert(app.selectedPositions[i], app.selected.pop(i))
+                
     
     #length is greater than or equal to 3
     else:
@@ -74,7 +89,6 @@ def onMouseRelease(app, mouseX, mouseY):
             for i in range(len(app.selected)-1 , -1, -1):
                     app.notSelected.insert(app.selectedPositions[i], app.selected.pop(i))
             
-            #empty app.selected
 
 
 def onMousePress(app, mouseX, mouseY):
@@ -83,12 +97,22 @@ def onMousePress(app, mouseX, mouseY):
 def redrawAll(app):
 
     drawGrid(app)
+
+    
+    for i in range(len(app.selected)-1):
+       
+        x,y = rowColToPixel(app, app.selected[i][0],app.selected[i][1])
+        nextX, nextY = rowColToPixel(app, app.selected[i+1][0],app.selected[i+1][1])
+        drawLine(x, y, nextX, nextY)
+    
     makeColors(app)
     for row in range(len(app.board)):
         for col in range(len(app.board[0])):
             color = findColor(app, row, col)
             x, y = rowColToPixel(app, row, col)
-            drawCircle(x, y, (app.boardWidth//app.cols)//2, fill = color, border = 'black')
+            drawCircle(x, y, (app.boardWidth//app.cols)//3, fill = color, border = 'black')
+
+    
 
 
 def findColor(app, row, col):
@@ -126,11 +150,15 @@ def drawGrid(app):
     cellHeight = app.boardHeight//app.rows
     for row in range(app.rows):
         for col in range(app.cols):
+            if abs(row-col)%2 == 0:
+                color = rgb(222,172,120)
+            else:
+                color = rgb(234,192,150)
           
             x = app.boardLeft + row*cellWidth
             y = app.boardTop + col*cellHeight
             drawRect(x, y, cellWidth, cellHeight, 
-                     fill = None, border = 'black', borderWidth = 1)
+                     fill = color)
 
 
              
@@ -156,14 +184,17 @@ def onKeyPress(app, key):
 
 def onStep(app):
 
-        for row in range (app.rows-1,-1,-1):
-            for col in range(app.cols):
-                if app.board[row][col] == 0 and row != 0:
+    for row in range (app.rows-1,-1,-1):
+        for col in range(app.cols):
+            if app.board[row][col] == 0 and row != 0:
                     app.board[row][col] = app.board[row-1][col]
                     app.board[row-1][col] = 0
 
-                elif app.board[row][col] == 0 and row == 0:
+            elif app.board[row][col] == 0 and row == 0:
                     app.board[row][col] = None
+
+
+    
 
 def main():
     runApp()
