@@ -5,8 +5,8 @@ import copy
 def onAppStart(app):
     app.width = 800
     app.height = 800
-    app.rows = 9
-    app.cols = 9
+    app.rows = 6
+    app.cols = 6
     app.board = [([None] * app.cols) for row in range(app.rows)]
     app.boardWidth = (3/4)*app.width
     app.boardHeight = (3/4)*app.height
@@ -236,24 +236,28 @@ def getHint(app):
                     for row, col in curr:
                         #keeps track of what we've seen already, no unnecessary repeats
                         copyBoard[row][col] == 'seen'
+                    
+                    #finds the best valid route within the bounds of the flood fill
+                    temp = findOptimal(app, curr)
+                    x,y = temp[0]
 
                     #current jelly is the target jelly
-                    if curr[0] == app.targetJelly:
-                        if len(curr) + 2 >= len(best):
-                            best = curr
+                    if app.board[x][y] == app.targetJelly:
+                        if len(temp) + 1 > len(best):
+                            best = temp
                             bestJelly = best[0]
 
                     #neither the current or best jelly 
-                    elif (len(curr) > len(best)) and (bestJelly != app.targetJelly):
-                        if len(curr) > len(best):
-                            best = curr
+                    elif (len(temp) > len(best)) and (bestJelly != app.targetJelly):
+                        if len(temp) > len(best):
+                            best = temp
                             x,y = best[0][0], best[0][1]
                             bestJelly = app.board[x][y]
 
                     #the current best is a solution with the target jellies
                     else:
-                        if len(curr) - 2 > len(best):
-                            best = curr
+                        if len(temp)  >= len(best):
+                            best = temp
                             bestJelly = best[0]
         
         
@@ -261,7 +265,6 @@ def getHint(app):
 
     else: app.hint = []
                 
-
     
 def floodFill(app, row, col):
     sol = []
@@ -277,7 +280,7 @@ def floodFillHelper(app, row, col, target, sol):
         (app.board[row][col] != target) or 
         (row, col) in sol):
         return sol
-    
+
     else:
         sol.append((row, col))
         floodFillHelper(app, row-1, col, target, sol) # up
@@ -292,6 +295,46 @@ def floodFillHelper(app, row, col, target, sol):
         if sol != []:
             return sol
         
+def findOptimal(app, possible):
+    sol = []
+    best = None
+    return findOptimalHelper(app, possible, sol, best)
+
+def findOptimalHelper(app, possible, sol, best):
+    if possible == []:
+        
+        return sol
+    
+    else:
+        for i in range(0, len(possible)):
+            
+            row, col = possible[i]
+            if isValidOptimal(app, row, col, sol):
+                sol.append((row,col))
+                taken = possible.pop(i)
+                newMove = findOptimalHelper(app, possible, sol, best)
+                if best == None or len(newMove) > len(best):
+                    return sol
+                sol.pop()
+                possible.insert(i, taken)
+    return best
+
+def isValidOptimal(app, row, col, sol):
+    if sol == []:
+        return True
+    
+    else: 
+        prevRow, prevCol = sol[-1]
+        #in neighboring cells or already in solution
+        if ((((prevRow+1, prevCol) == (row,col)) or ((prevRow-1, prevCol) == (row,col)) or 
+            ((prevRow, prevCol+1) == (row,col)) or ((prevRow, prevCol-1) == (row,col)) or 
+            ((prevRow+1, prevCol+1) == (row,col)) or ((prevRow-1, prevCol-1) == (row,col)) or 
+            ((prevRow+1, prevCol-1) == (row,col)) or ((prevRow-1, prevCol+1) == (row,col))) and 
+            ((row, col) not in sol)):
+            return True
+        else:
+            return False
+            
 
 def addScoreToOverall(app, popped):
     #bonus for popping target jelly
@@ -321,7 +364,7 @@ def calculateScore(app, length):
             
 
         else:
-            print('no')
+            
             #each jelly popped adds 20% to the score
             app.scores[length] = 6/5 * calculateScore(app, length-1)
             return app.scores[length]
