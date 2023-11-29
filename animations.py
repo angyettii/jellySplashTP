@@ -286,19 +286,21 @@ def floodFillHelper(app, row, col, target, sol):
             return sol
 
 def calculateScore(app, popped, addedScore = 0):
+    
     #memoization
-
+    
     #bonus for popping target jelly
     if popped[0] == app.targetJelly:
         multiplier = 1.5
+
     else:
+
         multiplier = 1
 
     if len(popped) in app.scores:
-        #bonus for popping target jelly
-        
+
         app.userScore += app.scores[len(popped)] * multiplier
-   
+    
     else:
         if len(popped) == 3: 
             addedScore += 600
@@ -307,7 +309,7 @@ def calculateScore(app, popped, addedScore = 0):
 
         else:
             
-            return 6/5 * calculateScore(app, popped[:1])
+            addedScore += 6/5 * calculateScore(app, popped[:1])
         
 
 def main():
