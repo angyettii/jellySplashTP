@@ -1,7 +1,6 @@
 from cmu_graphics import *
 from random import randint
 import copy
-import noSolution
 
 def onAppStart(app):
     app.width = 800
@@ -20,12 +19,12 @@ def onAppStart(app):
     app.selectedPositions = []
     #what the target jelly is this round 
     app.targetJelly = randint(1,6)
-
     app.totalMoves = 20
     app.userMoves = app.totalMoves
     app.userScore = 0
     app.hint =[]
     app.showHint =False
+    app.scores = dict()
 
 
 def loadCenters(app):
@@ -212,7 +211,7 @@ def onStep(app):
                     app.board[row][col] = None
 
     getHint(app)
-    solExists(app.board)
+    
 
 
 def getHint(app):
@@ -286,6 +285,30 @@ def floodFillHelper(app, row, col, target, sol):
         if sol != []:
             return sol
 
+def calculateScore(app, popped, addedScore = 0):
+    #memoization
+
+    #bonus for popping target jelly
+    if popped[0] == app.targetJelly:
+        multiplier = 1.5
+    else:
+        multiplier = 1
+
+    if len(popped) in app.scores:
+        #bonus for popping target jelly
+        
+        app.userScore += app.scores[len(popped)] * multiplier
+   
+    else:
+        if len(popped) == 3: 
+            addedScore += 600
+            app.scores[len(popped)] = addedScore
+            app.userScore += addedScore * multiplier
+
+        else:
+            
+            return 6/5 * calculateScore(app, popped[:1])
+        
 
 def main():
     runApp()
