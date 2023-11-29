@@ -1,5 +1,6 @@
 from cmu_graphics import *
 from random import randint
+import copy
 
 def onAppStart(app):
     app.width = 800
@@ -22,6 +23,8 @@ def onAppStart(app):
     app.totalMoves = 20
     app.userMoves = app.totalMoves
     app.userScore = 0
+    app.hint =[]
+    app.showHint =False
 
 def loadCenters(app):
     L = []
@@ -93,7 +96,10 @@ def onMouseRelease(app, mouseX, mouseY):
 
 
 def onMousePress(app, mouseX, mouseY):
+    #flood fill algo when hint button pressed, lightbulb png
+
     pass
+
 
 def redrawAll(app):
 
@@ -118,7 +124,7 @@ def redrawAll(app):
              fill = rgb(244, 206, 157), border = textColor, borderWidth = 10)
     drawLabel("Moves Left:", app.width/2, app.height*(1/28), size = 20, fill = rgb(97, 63, 19))
     drawLabel(f'{app.userMoves}', app.width/2, app.height*(1/12), size = 40)
-    
+    drawLabel('press h to show hint', app.width*1/5, app.height*1/10, size = 20)
 
 
 def findColor(app, row, col):
@@ -160,6 +166,9 @@ def drawGrid(app):
             if (row,col) in app.selected:
                 color = rgb(255, 236, 204)
 
+            elif(row,col) in app.hint:
+                color = 'blue'
+
             elif abs(row-col)%2 == 0:
                 color = rgb(222,172,120)
 
@@ -186,12 +195,8 @@ def onKeyPress(app, key):
         app.board[7][0] = 0
         app.board[5][3] = 0
     
-        #call falling after pop 
-
-            # if len(app.board[row]) != app.cols:
-            #     for difference in range(app.cols-len(app.board[row])):
-            #         app.board[row].insert(0,None)
-    
+    if key == 'h':
+        app.showHint = not app.showHint
 
 def onStep(app):
     #'falling'     
@@ -204,8 +209,80 @@ def onStep(app):
             elif app.board[row][col] == 0 and row == 0:
                     app.board[row][col] = None
 
+    getHint(app)
+
+
+def getHint(app):
+    if app.showHint == True:
+        copyBoard = copy.deepcopy(app.board)
+        best = []
+        bestJelly = None
+        
+        for row in range(app.rows):
+            for col in range(app.cols):
+                if copyBoard[row][col] != 'seen':
+                    curr = floodFill(app, row, col)
+                    
+
+                    for row, col in curr:
+                        #keeps track of what we've seen already, no unnecessary repeats
+                        copyBoard[row][col] == 'seen'
+
+                    #current jelly is the target jelly
+                    if curr[0] == app.targetJelly:
+                        if len(curr) + 2 >= len(best):
+                            best = curr
+                            bestJelly = best[0]
+
+                    #neither the current or best jelly 
+                    elif (len(curr) > len(best)) and (bestJelly != app.targetJelly):
+                        if len(curr) > len(best):
+                            best = curr
+                            x,y = best[0][0], best[0][1]
+                            bestJelly = app.board[x][y]
+
+                    #the current best is a solution with the target jellies
+                    else:
+                        if len(curr) - 2 > len(best):
+                            best = curr
+                            bestJelly = best[0]
+        
+        
+        app.hint = best
+
+    else: app.hint = []
+                
 
     
+def floodFill(app, row, col):
+    sol = []
+    target = app.board[row][col]
+    
+    return floodFillHelper(app, row, col, target, sol)
+
+
+def floodFillHelper(app, row, col, target, sol):
+
+    if ((row < 0) or (row >= app.rows) or
+        (col < 0) or (col >= app.cols) or
+        (app.board[row][col] != target) or 
+        (row, col) in sol):
+        return sol
+    
+    else:
+        sol.append((row, col))
+        floodFillHelper(app, row-1, col, target, sol) # up
+        floodFillHelper(app, row+1, col, target, sol) # down
+        floodFillHelper(app, row, col-1, target, sol) # left
+        floodFillHelper(app, row, col+1, target, sol) # right
+        floodFillHelper(app, row-1, col-1, target, sol) # up-left
+        floodFillHelper(app, row-1, col+1, target, sol) # up-right
+        floodFillHelper(app, row+1, col-1, target, sol) # down-right
+        floodFillHelper(app, row-1, col+1, target, sol) # down-left
+
+        if sol != []:
+            return sol
+
 
 def main():
     runApp()
