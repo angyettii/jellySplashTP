@@ -1,6 +1,7 @@
 from cmu_graphics import *
 from random import randint
 import copy
+import noSolution
 
 def onAppStart(app):
     app.width = 800
@@ -25,6 +26,7 @@ def onAppStart(app):
     app.userScore = 0
     app.hint =[]
     app.showHint =False
+
 
 def loadCenters(app):
     L = []
@@ -210,6 +212,7 @@ def onStep(app):
                     app.board[row][col] = None
 
     getHint(app)
+    solExists(app.board)
 
 
 def getHint(app):
