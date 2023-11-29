@@ -5,8 +5,8 @@ import copy
 def onAppStart(app):
     app.width = 800
     app.height = 800
-    app.rows = 6
-    app.cols = 6
+    app.rows = 7
+    app.cols = 7
     app.board = [([None] * app.cols) for row in range(app.rows)]
     app.boardWidth = (3/4)*app.width
     app.boardHeight = (3/4)*app.height
@@ -25,6 +25,7 @@ def onAppStart(app):
     app.hint =[]
     app.showHint =False
     app.scores = dict()
+    app.showHintTest = False
 
 
 def loadCenters(app):
@@ -170,7 +171,7 @@ def drawGrid(app):
     cellHeight = app.boardHeight//app.rows
     for row in range(app.rows):
         for col in range(app.cols):
-
+           
             if (row,col) in app.selected:
                 color = rgb(255, 236, 204)
 
@@ -205,6 +206,9 @@ def onKeyPress(app, key):
     
     if key == 'h':
         app.showHint = not app.showHint
+        print(app.showHint)
+    if key == 't':
+        app.showHintTest = not app.showHintTest
 
 def onStep(app):
     #'falling'     
@@ -218,11 +222,12 @@ def onStep(app):
                     app.board[row][col] = None
 
     getHint(app)
+
+    getHintTest(app)
     
 
-
-def getHint(app):
-    if app.showHint == True:
+def getHintTest(app):
+    if app.showHintTest == True:
         copyBoard = copy.deepcopy(app.board)
         best = []
         bestJelly = None
@@ -230,15 +235,15 @@ def getHint(app):
         for row in range(app.rows):
             for col in range(app.cols):
                 if copyBoard[row][col] != 'seen':
-                    curr = floodFill(app, row, col)
+                    temp = floodFill(app, row, col)
                     
 
-                    for row, col in curr:
+                    for row, col in temp:
                         #keeps track of what we've seen already, no unnecessary repeats
                         copyBoard[row][col] == 'seen'
                     
                     #finds the best valid route within the bounds of the flood fill
-                    temp = findOptimal(app, curr)
+                    # temp = findOptimal(app, curr)
                     x,y = temp[0]
 
                     #current jelly is the target jelly
@@ -256,12 +261,64 @@ def getHint(app):
 
                     #the current best is a solution with the target jellies
                     else:
-                        if len(temp)  >= len(best):
+                        if len(temp)-1  > len(best):
                             best = temp
                             bestJelly = best[0]
         
         
         app.hint = best
+
+    else: app.hint = []
+           
+
+def getHint(app):
+    if app.showHint == True:
+        
+        copyBoard = copy.deepcopy(app.board)
+        best = []
+        bestJelly = None
+
+        #why not going in order
+        for row in range(app.rows):
+            for col in range(app.cols):
+                if copyBoard[row][col] != 'seen':
+                    curr = floodFill(app, row, col)
+                    print(curr)
+                    
+
+                    for i, j  in curr:
+                        #keeps track of what we've seen already, no unnecessary repeats
+                        copyBoard[i][j] = 'seen'
+                    
+                    #finds the best valid route within the bounds of the flood fill
+                    
+                    temp = findOptimal(app, curr)
+                    print(temp)
+                    
+                    x,y = temp[0]
+
+                    #current jelly is the target jelly
+                    if app.board[x][y] == app.targetJelly:
+                        if len(temp) + 1 > len(best):
+                            best = temp
+                            bestJelly = best[0]
+
+                    #neither the current or best jelly 
+                    elif (len(temp) > len(best)) and (bestJelly != app.targetJelly):
+                        if len(temp) > len(best):
+                            best = temp
+                            x,y = best[0][0], best[0][1]
+                            bestJelly = app.board[x][y]
+
+                    #the current best is a solution with the target jellies
+                    else:
+                        if len(temp)-1  > len(best):
+                            best = temp
+                            bestJelly = best[0]
+        
+        
+        app.hint = best
+        
 
     else: app.hint = []
                 
@@ -290,7 +347,7 @@ def floodFillHelper(app, row, col, target, sol):
         floodFillHelper(app, row-1, col-1, target, sol) # up-left
         floodFillHelper(app, row-1, col+1, target, sol) # up-right
         floodFillHelper(app, row+1, col-1, target, sol) # down-right
-        floodFillHelper(app, row-1, col+1, target, sol) # down-left
+        floodFillHelper(app, row+1, col+1, target, sol) # down-left
 
         if sol != []:
             return sol
@@ -305,6 +362,7 @@ def findOptimalHelper(app, possible, sol, best):
         
         return sol
     
+    #returning too early, not exploring all options
     else:
         for i in range(0, len(possible)):
             
@@ -336,6 +394,7 @@ def isValidOptimal(app, row, col, sol):
             return False
             
 
+#adds score to user score
 def addScoreToOverall(app, popped):
     #bonus for popping target jelly
     x,y = popped[0]
@@ -343,31 +402,29 @@ def addScoreToOverall(app, popped):
             multiplier = 1.5
     else:
             multiplier = 1
+
+    #memoization
+    if len(popped) in app.scores:
+        addedScore = app.scores[len(popped)] 
     
-    addedScore = calculateScore(app, len(popped))
+    else: addedScore = calculateScore(app, len(popped))
+
     app.userScore += addedScore * multiplier
 
 
+#calculates score, each jelly popped gives 20% increase in score
 def calculateScore(app, length):
     
-    #memoization
-    
-    if length in app.scores:
-
-        return app.scores[length] 
-    
-    else:
-        #recursion
-        if length == 3: 
+     #base case
+    if length == 3: 
         
-            return 600
+        return 600
             
-
-        else:
-            
-            #each jelly popped adds 20% to the score
-            app.scores[length] = 6/5 * calculateScore(app, length-1)
-            return app.scores[length]
+    #recurse
+    else:    
+        #each jelly popped adds 20% to the score
+        app.scores[length] = 6/5 * calculateScore(app, length-1)
+        return app.scores[length]
             
             
 
