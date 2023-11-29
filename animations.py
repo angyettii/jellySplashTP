@@ -62,8 +62,9 @@ def onMouseDrag(app, mouseX, mouseY):
         if distance(mouseX, rowColToPixel(app, app.selected[ind][0], app.selected[ind][1])[0], 
                     mouseY, rowColToPixel(app, app.selected[ind][0], app.selected[ind][1])[1]) < (app.boardWidth//app.cols)//2:
             
-            app.notSelected.insert(app.selectedPositions[len(app.selected)-1], app.selected.pop())
+            app.notSelected.insert(app.selectedPositions[ind + 1], app.selected.pop(ind + 1))
         
+   
 def onMouseRelease(app, mouseX, mouseY):
     
     if len(app.selected) < 3:
@@ -86,7 +87,13 @@ def onMouseRelease(app, mouseX, mouseY):
                 
             
             #all the same color 
+        
+        
+
         if len(app.selected) != 0:
+            #add points to user score
+            addScoreToOverall(app, app.selected)
+
             for row, col in app.selected:
                 app.board[row][col] = 0
             app.userMoves -=1
@@ -103,7 +110,7 @@ def onMousePress(app, mouseX, mouseY):
 
 
 def redrawAll(app):
-
+    
     drawGrid(app)
     
     for i in range(len(app.selected)-1):
@@ -115,7 +122,8 @@ def redrawAll(app):
     makeColors(app)
     for row in range(len(app.board)):
         for col in range(len(app.board[0])):
-            color = findColor(app, row, col)
+            val = app.board[row][col]
+            color = findColor(app, val)
             x, y = rowColToPixel(app, row, col)
             drawCircle(x, y, (app.boardWidth//app.cols)//3, 
                        fill = color, border = 'black')
@@ -125,11 +133,10 @@ def redrawAll(app):
              fill = rgb(244, 206, 157), border = textColor, borderWidth = 10)
     drawLabel("Moves Left:", app.width/2, app.height*(1/28), size = 20, fill = rgb(97, 63, 19))
     drawLabel(f'{app.userMoves}', app.width/2, app.height*(1/12), size = 40)
-    drawLabel('press h to show hint', app.width*1/5, app.height*1/10, size = 20)
+    drawLabel(f'Score: {int(app.userScore)}', app.width*1/10, app.height*1/15, size = 20)
+    drawLabel(f'target: {findColor(app, app.targetJelly)}', app.width*17/20,app.height*1/15, size = 20)
 
-
-def findColor(app, row, col):
-    val = app.board[row][col]
+def findColor(app, val):
 
     if val == 1:
         return 'purple'
@@ -284,33 +291,42 @@ def floodFillHelper(app, row, col, target, sol):
 
         if sol != []:
             return sol
+        
 
-def calculateScore(app, popped, addedScore = 0):
+def addScoreToOverall(app, popped):
+    #bonus for popping target jelly
+    x,y = popped[0]
+    if app.board[x][y] == app.targetJelly:
+            multiplier = 1.5
+    else:
+            multiplier = 1
+    
+    addedScore = calculateScore(app, len(popped))
+    app.userScore += addedScore * multiplier
+
+
+def calculateScore(app, length):
     
     #memoization
     
-    #bonus for popping target jelly
-    if popped[0] == app.targetJelly:
-        multiplier = 1.5
+    if length in app.scores:
 
-    else:
-
-        multiplier = 1
-
-    if len(popped) in app.scores:
-
-        app.userScore += app.scores[len(popped)] * multiplier
+        return app.scores[length] 
     
     else:
-        if len(popped) == 3: 
-            addedScore += 600
-            app.scores[len(popped)] = addedScore
-            app.userScore += addedScore * multiplier
+        #recursion
+        if length == 3: 
+        
+            return 600
+            
 
         else:
+            print('no')
+            #each jelly popped adds 20% to the score
+            app.scores[length] = 6/5 * calculateScore(app, length-1)
+            return app.scores[length]
             
-            addedScore += 6/5 * calculateScore(app, popped[:1])
-        
+            
 
 def main():
     runApp()
