@@ -5,8 +5,8 @@ import copy
 def onAppStart(app):
     app.width = 800
     app.height = 800
-    app.rows = 7
-    app.cols = 7
+    app.rows = 9
+    app.cols = 9
     app.board = [([None] * app.cols) for row in range(app.rows)]
     app.boardWidth = (3/4)*app.width
     app.boardHeight = (3/4)*app.height
@@ -26,6 +26,7 @@ def onAppStart(app):
     app.showHint =False
     app.scores = dict()
     app.showHintTest = False
+   
 
 
 def loadCenters(app):
@@ -206,7 +207,7 @@ def onKeyPress(app, key):
     
     if key == 'h':
         app.showHint = not app.showHint
-        print(app.showHint)
+        
     if key == 't':
         app.showHintTest = not app.showHintTest
 
@@ -223,53 +224,6 @@ def onStep(app):
 
     getHint(app)
 
-    getHintTest(app)
-    
-
-def getHintTest(app):
-    if app.showHintTest == True:
-        copyBoard = copy.deepcopy(app.board)
-        best = []
-        bestJelly = None
-        
-        for row in range(app.rows):
-            for col in range(app.cols):
-                if copyBoard[row][col] != 'seen':
-                    temp = floodFill(app, row, col)
-                    
-
-                    for row, col in temp:
-                        #keeps track of what we've seen already, no unnecessary repeats
-                        copyBoard[row][col] == 'seen'
-                    
-                    #finds the best valid route within the bounds of the flood fill
-                    # temp = findOptimal(app, curr)
-                    x,y = temp[0]
-
-                    #current jelly is the target jelly
-                    if app.board[x][y] == app.targetJelly:
-                        if len(temp) + 1 > len(best):
-                            best = temp
-                            bestJelly = best[0]
-
-                    #neither the current or best jelly 
-                    elif (len(temp) > len(best)) and (bestJelly != app.targetJelly):
-                        if len(temp) > len(best):
-                            best = temp
-                            x,y = best[0][0], best[0][1]
-                            bestJelly = app.board[x][y]
-
-                    #the current best is a solution with the target jellies
-                    else:
-                        if len(temp)-1  > len(best):
-                            best = temp
-                            bestJelly = best[0]
-        
-        
-        app.hint = best
-
-    else: app.hint = []
-           
 
 def getHint(app):
     if app.showHint == True:
@@ -278,12 +232,12 @@ def getHint(app):
         best = []
         bestJelly = None
 
-        #why not going in order
+        
         for row in range(app.rows):
             for col in range(app.cols):
                 if copyBoard[row][col] != 'seen':
                     curr = floodFill(app, row, col)
-                    print(curr)
+                    
                     
 
                     for i, j  in curr:
@@ -292,8 +246,8 @@ def getHint(app):
                     
                     #finds the best valid route within the bounds of the flood fill
                     
-                    temp = findOptimal(app, curr)
-                    print(temp)
+                    temp = compareWithinFill(app, curr)
+                    
                     
                     x,y = temp[0]
 
@@ -352,14 +306,21 @@ def floodFillHelper(app, row, col, target, sol):
         if sol != []:
             return sol
         
-def findOptimal(app, possible):
+def findOptimal(app, possibleStart):
     sol = []
     best = None
-    return findOptimalHelper(app, possible, sol, best)
+    
+    copyPossibleStart = copy.deepcopy(possibleStart)
 
-def findOptimalHelper(app, possible, sol, best):
-    if possible == []:
+    for max in range(len(possibleStart), -1, -1):
+        tryingCurr = findOptimalHelper(app, copyPossibleStart, sol, max)
         
+        if  tryingCurr != None:
+            return tryingCurr
+
+#only finding first
+def findOptimalHelper(app, possible, sol, max):
+    if len(sol) == max:
         return sol
     
     #returning too early, not exploring all options
@@ -370,12 +331,12 @@ def findOptimalHelper(app, possible, sol, best):
             if isValidOptimal(app, row, col, sol):
                 sol.append((row,col))
                 taken = possible.pop(i)
-                newMove = findOptimalHelper(app, possible, sol, best)
-                if best == None or len(newMove) > len(best):
+                newMove = findOptimalHelper(app, possible, sol, max)
+                if newMove != None:
                     return sol
                 sol.pop()
                 possible.insert(i, taken)
-    return best
+    return None
 
 def isValidOptimal(app, row, col, sol):
     if sol == []:
@@ -393,6 +354,22 @@ def isValidOptimal(app, row, col, sol):
         else:
             return False
             
+def compareWithinFill(app, possible):
+    best = []
+   
+    # for i in range(len(possible)):
+    #     possible.insert(0, possible.pop(i))
+    #     #finds path from each jelly in possible
+    currPath = findOptimal(app, possible)
+        #best check
+        
+    if best == [] or len(currPath) > len(best):
+        best = currPath 
+        # possible.insert(i, possible.pop(0))
+
+   
+    return best
+
 
 #adds score to user score
 def addScoreToOverall(app, popped):
