@@ -5,8 +5,8 @@ import copy
 def onAppStart(app):
     app.width = 800
     app.height = 800
-    app.rows = 6
-    app.cols = 6
+    app.rows = 9
+    app.cols = 9
     app.board = [([None] * app.cols) for row in range(app.rows)]
     app.boardWidth = (3/4)*app.width
     app.boardHeight = (3/4)*app.height
@@ -26,6 +26,8 @@ def onAppStart(app):
     app.showHint =False
     app.scores = dict()
     app.showHintTest = False
+    
+    
     
 
 
@@ -122,8 +124,8 @@ def redrawAll(app):
         drawLine(x, y, nextX, nextY)
     
     makeColors(app)
-    for row in range(len(app.board)):
-        for col in range(len(app.board[0])):
+    for row in range(app.rows):
+        for col in range(app.cols):
             val = app.board[row][col]
             color = findColor(app, val)
             x, y = rowColToPixel(app, row, col)
@@ -159,8 +161,9 @@ def findColor(app, val):
         return 'orange'
     
 def makeColors(app):
-    for row in range(len(app.board)):
-        for col in range(len(app.board[0])):
+    
+    for row in range(app.rows):
+        for col in range(app.cols):
             if app.board[row][col] == None:
                 color = randint(1,6) 
                 app.board[row][col] = color
@@ -202,8 +205,10 @@ def onKeyPress(app, key):
     if key == 'r':
         app.board[0][0] = None
     if key == 'p':
-        app.board[7][0] = 0
-        app.board[5][3] = 0
+        for row in range(app.rows):
+            for col in range(app.cols):
+                app.board[row][col] = 0
+        
     
     if key == 'h':
         app.showHint = not app.showHint
@@ -213,7 +218,8 @@ def onKeyPress(app, key):
         app.board = shuffle(app)
 
 def onStep(app):
-    #'falling'     
+    #'falling'   
+    
     for row in range (app.rows-1,-1,-1):
         for col in range(app.cols):
             if app.board[row][col] == 0 and row != 0:
@@ -403,7 +409,7 @@ def calculateScore(app, length):
         #each jelly popped adds 20% to the score
         app.scores[length] = 6/5 * calculateScore(app, length-1)
         return app.scores[length]
-            
+          
 
 def solExists(board):
     for row in range(len(board)):
@@ -456,9 +462,9 @@ def shuffle(app):
     shuffleHelper(app, newBoard, boardContents)
     
     if solExists(newBoard):
-        app.board = newBoard
-        print(app.board)
-        print(newBoard)
+        for row in range(app.rows):
+            for col in range(app.cols):
+                app.board[row][col] = newBoard[row][col]
 
     else:
         
