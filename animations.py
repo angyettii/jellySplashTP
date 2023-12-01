@@ -7,17 +7,21 @@ def onAppStart(app):
     app.height = 800
     app.rows = 9
     app.cols = 9
-    app.board = [([None] * app.cols) for row in range(app.rows)]
     app.boardWidth = (3/4)*app.width
     app.boardHeight = (3/4)*app.height
     app.boardLeft = (1/8)*app.width
     app.boardTop = (1/6)*app.height
     app.cellBorderWidth = 2
-    app.selected = []
     app.centers = loadCenters(app)
-    app.notSelected = app.centers
-    app.selectedPositions = []
     #what the target jelly is this round 
+    app.winningScore = 30000
+    startStuff(app)
+    
+def startStuff(app):
+    app.board = [([None] * app.cols) for row in range(app.rows)]
+    app.notSelected = app.centers
+    app.selected = []
+    app.selectedPositions = []
     app.targetJelly = randint(1,6)
     app.totalMoves = 20
     app.userMoves = app.totalMoves
@@ -26,8 +30,8 @@ def onAppStart(app):
     app.showHint =False
     app.scores = dict()
     app.showHintTest = False
-    
-    
+    app.gameOver = False
+    app.won = False
 
 
 def loadCenters(app):
@@ -44,29 +48,30 @@ def distance(x1, x2, y1, y2):
 
 def onMouseDrag(app, mouseX, mouseY):
 
-    count = 0
-    while count < len(app.notSelected):
-        #if distance from a center is less than radius, that circle is selected 
-        cxPixel = (rowColToPixel(app, app.notSelected[count][0], app.notSelected[count][1])[0])
-        cyPixel = (rowColToPixel(app, app.notSelected[count][0], app.notSelected[count][1])[1])
-        if distance(mouseX, cxPixel,  mouseY, cyPixel ) < (app.boardWidth//app.cols)//2:
-            #saves the index of the popped element
-            app.selectedPositions.append(count)
-            app.selected.append(app.notSelected.pop(count))
-        
-        #else, move on to the next circle
-        else:
-            count += 1
-
-    #allows user to 'undo' selection
-    if len(app.selected) >=2:
-        ind = len(app.selected) - 2
-        
-        if distance(mouseX, rowColToPixel(app, app.selected[ind][0], app.selected[ind][1])[0], 
-                    mouseY, rowColToPixel(app, app.selected[ind][0], app.selected[ind][1])[1]) < (app.boardWidth//app.cols)//2:
+    if app.gameOver == False:
+        count = 0
+        while count < len(app.notSelected):
+            #if distance from a center is less than radius, that circle is selected 
+            cxPixel = (rowColToPixel(app, app.notSelected[count][0], app.notSelected[count][1])[0])
+            cyPixel = (rowColToPixel(app, app.notSelected[count][0], app.notSelected[count][1])[1])
+            if distance(mouseX, cxPixel,  mouseY, cyPixel ) < (app.boardWidth//app.cols)//2:
+                #saves the index of the popped element
+                app.selectedPositions.append(count)
+                app.selected.append(app.notSelected.pop(count))
             
-            app.notSelected.insert(app.selectedPositions[ind + 1], app.selected.pop(ind + 1))
-        
+            #else, move on to the next circle
+            else:
+                count += 1
+
+        #allows user to 'undo' selection
+        if len(app.selected) >=2:
+            ind = len(app.selected) - 2
+            
+            if distance(mouseX, rowColToPixel(app, app.selected[ind][0], app.selected[ind][1])[0], 
+                        mouseY, rowColToPixel(app, app.selected[ind][0], app.selected[ind][1])[1]) < (app.boardWidth//app.cols)//2:
+                
+                app.notSelected.insert(app.selectedPositions[ind + 1], app.selected.pop(ind + 1))
+            
    
 def onMouseRelease(app, mouseX, mouseY):
     
@@ -91,8 +96,6 @@ def onMouseRelease(app, mouseX, mouseY):
             
             #all the same color 
         
-        
-
         if len(app.selected) != 0:
             #add points to user score
             addScoreToOverall(app, app.selected)
@@ -103,6 +106,9 @@ def onMouseRelease(app, mouseX, mouseY):
 
             for i in range(len(app.selected)-1 , -1, -1):
                     app.notSelected.insert(app.selectedPositions[i], app.selected.pop(i))
+        #checks if the game is over after every move
+        app.showHint = False
+        isGameOver(app)
             
 
 
@@ -138,6 +144,21 @@ def redrawAll(app):
     drawLabel(f'{app.userMoves}', app.width/2, app.height*(1/12), size = 40)
     drawLabel(f'Score: {int(app.userScore)}', app.width*1/10, app.height*1/15, size = 20)
     drawLabel(f'target: {findColor(app, app.targetJelly)}', app.width*17/20,app.height*1/15, size = 20)
+
+    if app.gameOver == True:
+        drawRect(0, 0, app.width, app.height, fill = rgb(157, 135, 168), opacity = 78)
+        if app.won == True:
+            rectColor = rgb(139, 209, 125)
+            msg = (f'Congratulations, you scored {int(app.userScore)} and won!')
+        else: 
+            rectColor = rgb(227, 104, 79)
+            msg = (f"Oh no, you've run out of moves! Your score was {int(app.userScore)}.")
+
+        drawRect(app.width/7, app.height/4, app.width*(5/7), app.height/2, fill = rectColor)
+        drawLabel(msg, app.width/2, app.height/3, size = 20)
+        drawLabel('Play Again?', app.width/2, app.height*(2/5), size = 25)
+        #import happy and sad image
+        #import retry symbol pic
 
 def findColor(app, val):
 
@@ -214,7 +235,7 @@ def onKeyPress(app, key):
 
     if key == 's':
         print(solExists(app.board))
-        app.board = shuffle(app)
+        shuffle(app)
 
 def onStep(app):
     #'falling'   
@@ -282,7 +303,9 @@ def getHint(app):
 
     else: app.hint = []
                 
-    
+#referenced articles: https://levelup.gitconnected.com/floodfill-algorithm-explained-all-you-need-to-know-with-code-samples-265d5db87777
+#https://www.geeksforgeeks.org/flood-fill-algorithm/
+
 def floodFill(app, row, col):
     sol = []
     target = app.board[row][col]
@@ -455,9 +478,9 @@ def shuffle(app):
     #to have at least 1 solution
  
     boardContents = flatten(copy.deepcopy(app.board))
-    
+   
     newBoard = [([None] * app.cols) for row in range(app.rows)]
-    
+   
     shuffleHelper(app, newBoard, boardContents)
     
     if solExists(newBoard):
@@ -465,6 +488,8 @@ def shuffle(app):
             for col in range(app.cols):
                 app.board[row][col] = newBoard[row][col]
 
+     
+   
     else:
         
         return shuffle(app)
@@ -491,7 +516,7 @@ def findUnshuffled(app, newBoard):
                 return row, col
     
     return 'not shuffled'
-
+#csacademy 7.8 exercise 
 def flatten(L):
     
     if L == []:
@@ -504,6 +529,14 @@ def flatten(L):
         else:
             return [first] + flatten(rest)
             
+def isGameOver(app):
+    if app.userScore >= app.winningScore:
+        app.won = True
+        app.gameOver = True
+
+
+    elif app.userMoves <= 0 :
+        app.gameOver = True
 
 def main():
     runApp()

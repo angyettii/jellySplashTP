@@ -60,7 +60,7 @@ def shuffle(board):
             return shuffle(board)
 
 
-
+#csacademy 7.8 exercise 
 def flatten(L):
     if L == []:
         return []
