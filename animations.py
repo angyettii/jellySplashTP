@@ -28,7 +28,6 @@ def onAppStart(app):
     app.showHintTest = False
     
     
-    
 
 
 def loadCenters(app):
