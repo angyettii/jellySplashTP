@@ -1,6 +1,8 @@
 from cmu_graphics import *
 from random import randint
 import copy
+from PIL import Image
+
 
 def onAppStart(app):
     app.width = 800
@@ -14,8 +16,11 @@ def onAppStart(app):
     app.cellBorderWidth = 2
     app.centers = loadCenters(app)
     #what the target jelly is this round 
-    app.winningScore = 30000
+    app.winningScore = 19
     startStuff(app)
+    loadImages(app)
+    
+    
     
 def startStuff(app):
     app.board = [([None] * app.cols) for row in range(app.rows)]
@@ -23,7 +28,7 @@ def startStuff(app):
     app.selected = []
     app.selectedPositions = []
     app.targetJelly = randint(1,6)
-    app.totalMoves = 20
+    app.totalMoves = 1
     app.userMoves = app.totalMoves
     app.userScore = 0
     app.hint =[]
@@ -32,6 +37,15 @@ def startStuff(app):
     app.showHintTest = False
     app.gameOver = False
     app.won = False
+    app.canShuffle = False
+
+def loadImages(app):
+    #https://stock.adobe.com/images/Cartoon-grass-with-small-flowers-daisy-and-marigold.-Grass-field%2C-background/177790791
+    app.backgroundImage = Image.open('images/istockphoto-865924416-612x612.jpg')
+    app.backgroundImage = CMUImage(app.backgroundImage)
+    #https://thenounproject.com/icon/retry-1921228/
+    app.retryImage = Image.open('images/retry.png')
+    app.retryImage = CMUImage(app.retryImage)
 
 
 def loadCenters(app):
@@ -113,13 +127,19 @@ def onMouseRelease(app, mouseX, mouseY):
 
 
 def onMousePress(app, mouseX, mouseY):
-    #flood fill algo when hint button pressed, lightbulb png
-
-    pass
+   
+    if app.gameOver == True: 
+        pilImage = app.retryImage.image
+        if distance(mouseX, app.width/2, mouseY, app.height*(2/3)) < pilImage.width/5:
+            startStuff(app)
 
 
 def redrawAll(app):
+    pilImage = app.backgroundImage.image
+    drawImage(app.backgroundImage, app.width/2, app.height/2, align='center', width = pilImage.width*(4/3), height = pilImage.height*(4/3))
     
+    textColor = rgb(163, 99, 3)
+    drawRect(app.width*1/10, app.height*15/112, app.width*4/5, app.height*4/5, fill = textColor)
     drawGrid(app)
     
     for i in range(len(app.selected)-1):
@@ -137,7 +157,7 @@ def redrawAll(app):
             drawCircle(x, y, (app.boardWidth//app.cols)//3, 
                        fill = color, border = 'black')
             
-    textColor = rgb(133, 90, 35)
+    
     drawOval(app.width/2, app.height*(1/20), app.width/4, app.height/5, 
              fill = rgb(244, 206, 157), border = textColor, borderWidth = 10)
     drawLabel("Moves Left:", app.width/2, app.height*(1/28), size = 20, fill = rgb(97, 63, 19))
@@ -150,15 +170,19 @@ def redrawAll(app):
         if app.won == True:
             rectColor = rgb(139, 209, 125)
             msg = (f'Congratulations, you scored {int(app.userScore)} and won!')
+            retryColor = rgb(10, 107, 24)
         else: 
             rectColor = rgb(227, 104, 79)
             msg = (f"Oh no, you've run out of moves! Your score was {int(app.userScore)}.")
+            retryColor = rgb(194, 23, 17)
 
         drawRect(app.width/7, app.height/4, app.width*(5/7), app.height/2, fill = rectColor)
         drawLabel(msg, app.width/2, app.height/3, size = 20)
         drawLabel('Play Again?', app.width/2, app.height*(2/5), size = 25)
         #import happy and sad image
-        #import retry symbol pic
+        pilImage = app.retryImage.image
+        drawCircle(app.width/2, app.height*(321/480), pilImage.width/5, fill = retryColor)
+        drawImage(app.retryImage, app.width/2, app.height*(2/3), align='center', width = pilImage.width/3, height = pilImage.height/3)
 
 def findColor(app, val):
 
@@ -516,6 +540,7 @@ def findUnshuffled(app, newBoard):
                 return row, col
     
     return 'not shuffled'
+
 #csacademy 7.8 exercise 
 def flatten(L):
     
