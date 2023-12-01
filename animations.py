@@ -5,8 +5,8 @@ import copy
 def onAppStart(app):
     app.width = 800
     app.height = 800
-    app.rows = 9
-    app.cols = 9
+    app.rows = 6
+    app.cols = 6
     app.board = [([None] * app.cols) for row in range(app.rows)]
     app.boardWidth = (3/4)*app.width
     app.boardHeight = (3/4)*app.height
@@ -177,7 +177,7 @@ def drawGrid(app):
                 color = rgb(255, 236, 204)
 
             elif(row,col) in app.hint:
-                color = 'blue'
+                color = rgb(137, 197, 240)
 
             elif abs(row-col)%2 == 0:
                 color = rgb(222,172,120)
@@ -210,6 +210,7 @@ def onKeyPress(app, key):
 
     if key == 's':
         print(solExists(app.board))
+        app.board = shuffle(app)
 
 def onStep(app):
     #'falling'     
@@ -443,28 +444,51 @@ def isValid(board, row, col, nextRow, nextCol, sol):
         ((nextRow, nextCol) not in sol)):
         return True
 
-def shuffle(board):
+def shuffle(app):
     #if no solution exists on the current board, need to shuffle
     #returns board with the same contents, just shuffled and guaranteed 
     #to have at least 1 solution
-    if solExists(board) == False:
-        boardContents = flatten(copy.deepcopy(board))
+ 
+    boardContents = flatten(copy.deepcopy(app.board))
+    
+    newBoard = [([None] * app.cols) for row in range(app.rows)]
+    
+    shuffleHelper(app, newBoard, boardContents)
+    
+    if solExists(newBoard):
+        app.board = newBoard
+        print(app.board)
+        print(newBoard)
 
-        newBoard = [([None] * 9) for row in range(9)]
+    else:
+        
+        return shuffle(app)
+   
 
-        for i in range(len(boardContents)-1, -1, -1):
-            for row in range(len(newBoard)):
-                for col in range(len(newBoard[0])):
-                    newBoard[row][col] = boardContents[randint(0,i)]
+def shuffleHelper(app, newBoard, boardContents):
+    if findUnshuffled(app, newBoard) == 'not shuffled':
+        return 
+    
+    else:
+        row, col = findUnshuffled(app, newBoard)
+        index = randint(0,len(boardContents) - 1)
+        newBoard[row][col] = boardContents[index]
+        boardContents.pop(index)
+        shuffleHelper(app, newBoard, boardContents)
+        
 
-        if solExists(newBoard):
-            return newBoard
-        else:
-            return shuffle(board)
 
-
+def findUnshuffled(app, newBoard):
+    for row in range(app.rows):
+        for col in range(app.cols):
+            if newBoard[row][col] == None: 
+                
+                return row, col
+    
+    return 'not shuffled'
 
 def flatten(L):
+    
     if L == []:
         return []
     else:
