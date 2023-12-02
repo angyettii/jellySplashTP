@@ -484,9 +484,7 @@ def isValidOptimal(app, row, col, sol):
 def compareWithinFill(app, possible):
     best = []
    
-    # for i in range(len(possible)):
-    #     possible.insert(0, possible.pop(i))
-    #     #finds path from each jelly in possible
+    # finds path from each jelly in possible
     currPath = findOptimal(app, possible)
         #best check
         
@@ -582,12 +580,9 @@ def shuffle(app):
     shuffleHelper(app, newBoard, boardContents)
     
     if solExists(newBoard):
-        for row in range(app.rows):
-            for col in range(app.cols):
-                app.board[row][col] = newBoard[row][col]
+        
+        app.board = newBoard
 
-     
-   
     else:
         
         return shuffle(app)
@@ -627,6 +622,7 @@ def flatten(L):
             return flatten(first) + flatten(rest)
         else:
             return [first] + flatten(rest)
+        
             
 def isGameOver(app):
     if app.userScore >= app.winningScore:
