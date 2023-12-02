@@ -16,19 +16,19 @@ def onAppStart(app):
     app.cellBorderWidth = 2
     app.centers = loadCenters(app)
     #what the target jelly is this round 
-    app.winningScore = 19
-    startStuff(app)
+    app.winningScore = 10000
+    onStart(app)
     loadImages(app)
     
     
     
-def startStuff(app):
+def onStart(app):
     app.board = [([None] * app.cols) for row in range(app.rows)]
     app.notSelected = app.centers
     app.selected = []
     app.selectedPositions = []
     app.targetJelly = randint(1,6)
-    app.totalMoves = 1
+    app.totalMoves = 20
     app.userMoves = app.totalMoves
     app.userScore = 0
     app.hint =[]
@@ -43,9 +43,18 @@ def loadImages(app):
     #https://stock.adobe.com/images/Cartoon-grass-with-small-flowers-daisy-and-marigold.-Grass-field%2C-background/177790791
     app.backgroundImage = Image.open('images/istockphoto-865924416-612x612.jpg')
     app.backgroundImage = CMUImage(app.backgroundImage)
+
     #https://thenounproject.com/icon/retry-1921228/
     app.retryImage = Image.open('images/retry.png')
     app.retryImage = CMUImage(app.retryImage)
+
+    #https://pngtree.com/freepng/shining-bright-light-bulb_8539561.html
+    app.lightbulbImage = Image.open('images/lightbulb.webp')
+    app.lightbulbImage = CMUImage(app.lightbulbImage)
+
+    #https://www.flaticon.com/free-icon/shuffle_3580329
+    app.shuffleImage = Image.open('images/shuffle.png')
+    app.shuffleImage = CMUImage(app.shuffleImage)
 
 
 def loadCenters(app):
@@ -123,6 +132,7 @@ def onMouseRelease(app, mouseX, mouseY):
         #checks if the game is over after every move
         app.showHint = False
         isGameOver(app)
+    
             
 
 
@@ -131,15 +141,22 @@ def onMousePress(app, mouseX, mouseY):
     if app.gameOver == True: 
         pilImage = app.retryImage.image
         if distance(mouseX, app.width/2, mouseY, app.height*(2/3)) < pilImage.width/5:
-            startStuff(app)
-
+            onStart(app)
+    else: 
+        pilImage = app.lightbulbImage.image
+        if distance(mouseX, app.width*9/10, mouseY, app.height/15) < pilImage.height/45:
+            app.showHint = not app.showHint
+        
+        pilImage = app.shuffleImage.image
+        if distance(mouseX, app.width*3/4, mouseY, app.height/15) < pilImage.width/12:
+            shuffle(app)
 
 def redrawAll(app):
     pilImage = app.backgroundImage.image
     drawImage(app.backgroundImage, app.width/2, app.height/2, align='center', width = pilImage.width*(4/3), height = pilImage.height*(4/3))
     
     textColor = rgb(163, 99, 3)
-    drawRect(app.width*1/10, app.height*15/112, app.width*4/5, app.height*4/5, fill = textColor)
+    drawRect(app.width*1/10, app.height*31/224, app.width*4/5, app.height*4/5, fill = textColor)
     drawGrid(app)
     
     for i in range(len(app.selected)-1):
@@ -162,8 +179,16 @@ def redrawAll(app):
              fill = rgb(244, 206, 157), border = textColor, borderWidth = 10)
     drawLabel("Moves Left:", app.width/2, app.height*(1/28), size = 20, fill = rgb(97, 63, 19))
     drawLabel(f'{app.userMoves}', app.width/2, app.height*(1/12), size = 40)
-    drawLabel(f'Score: {int(app.userScore)}', app.width*1/10, app.height*1/15, size = 20)
-    drawLabel(f'target: {findColor(app, app.targetJelly)}', app.width*17/20,app.height*1/15, size = 20)
+    drawLabel(f'Score: {int(app.userScore)}', app.width*3/20, app.height*1/22, size = 25)
+    drawLabel(f'target: {findColor(app, app.targetJelly)}', app.width*3/20,app.height*1/10, size = 20)
+
+    pilImage = app.lightbulbImage.image
+    drawCircle(app.width*9/10, app.height/15, pilImage.height/45, fill = 'white', border = 'black', borderWidth = 2)
+    drawImage(app.lightbulbImage, app.width*9/10, app.height/15, align='center', width = pilImage.width/18, height = pilImage.height/18)
+
+    pilImage = app.shuffleImage.image
+    drawCircle(app.width*3/4, app.height/15, pilImage.width/12, fill = 'white', border = 'black', borderWidth = 2)
+    drawImage(app.shuffleImage, app.width*3/4, app.height/15, align='center', width = pilImage.width/8, height = pilImage.height/8)
 
     if app.gameOver == True:
         drawRect(0, 0, app.width, app.height, fill = rgb(157, 135, 168), opacity = 78)
@@ -212,7 +237,18 @@ def makeColors(app):
                 color = randint(1,6) 
                 app.board[row][col] = color
 
-           
+def dropDown(app):
+
+    #'falling'   
+    
+    for row in range (app.rows-1,-1,-1):
+        for col in range(app.cols):
+            if app.board[row][col] == 0 and row != 0:
+                    app.board[row][col] = app.board[row-1][col]
+                    app.board[row-1][col] = 0
+
+            elif app.board[row][col] == 0 and row == 0:
+                    app.board[row][col] = None
 
 def drawGrid(app):
     cellWidth = app.boardWidth//app.cols
@@ -245,35 +281,11 @@ def rowColToPixel(app, row, col):
     return (cellWidth*col + cellWidth //2 + app.boardLeft, 
             cellHeight*row + cellHeight // 2 + app.boardTop)
  
-def onKeyPress(app, key):
-    if key == 'r':
-        app.board[0][0] = None
-    if key == 'p':
-        for row in range(app.rows):
-            for col in range(app.cols):
-                app.board[row][col] = 0
-        
-    
-    if key == 'h':
-        app.showHint = not app.showHint
-
-    if key == 's':
-        print(solExists(app.board))
-        shuffle(app)
 
 def onStep(app):
-    #'falling'   
-    
-    for row in range (app.rows-1,-1,-1):
-        for col in range(app.cols):
-            if app.board[row][col] == 0 and row != 0:
-                    app.board[row][col] = app.board[row-1][col]
-                    app.board[row-1][col] = 0
-
-            elif app.board[row][col] == 0 and row == 0:
-                    app.board[row][col] = None
-
+    dropDown(app)
     getHint(app)
+    
 
 
 def getHint(app):
@@ -287,7 +299,8 @@ def getHint(app):
         for row in range(app.rows):
             for col in range(app.cols):
                 if copyBoard[row][col] != 'seen':
-                    curr = floodFill(app, row, col)
+                    target = app.board[row][col] 
+                    curr = floodFill(app, row, col, target)
                     
                     
 
@@ -326,39 +339,100 @@ def getHint(app):
         
 
     else: app.hint = []
-                
+
+
+
 #referenced articles: https://levelup.gitconnected.com/floodfill-algorithm-explained-all-you-need-to-know-with-code-samples-265d5db87777
 #https://www.geeksforgeeks.org/flood-fill-algorithm/
+#https://en.wikipedia.org/wiki/Flood_fill#Moving_the_recursion_into_a_data_structure
 
-def floodFill(app, row, col):
-    sol = []
-    target = app.board[row][col]
+def floodFill(app, row, col, target):
     
-    return floodFillHelper(app, row, col, target, sol)
+    stack = []
+
+    stack.append((row, col))
+
+    sol = [(row,col)]
 
 
-def floodFillHelper(app, row, col, target, sol):
+    while stack != []:
+         
+        
+        curr = stack.pop()
+         
+        x = curr[0]
+        y = curr[1]
+         
+        # Check if the jellies next to the current one are valid
 
+        #down
+        if isValidFloodFill(app, x + 1, y, sol, target):
+             
+            # if valid, add to solution and stack
+            sol.append((x + 1, y))
+            stack.append((x + 1, y))
+         
+        #right 
+        if isValidFloodFill(app, x, y+1, sol, target):
+             
+            # if valid, add to solution and stack
+            sol.append((x, y+1))
+            stack.append((x, y+1))
+         
+        #up 
+        if isValidFloodFill(app, x - 1, y, sol, target):
+             
+            # if valid, add to solution and stack
+            sol.append((x - 1, y))
+            stack.append((x - 1, y))
+         
+        #right 
+        if isValidFloodFill(app, x , y -1, sol, target):
+             
+            # if valid, add to solution and stack
+            sol.append((x , y -1 ))
+            stack.append((x , y - 1))
+
+        #down-left
+        if isValidFloodFill(app, x +1 , y +1, sol, target):
+             
+            # if valid, add to solution and stack
+            sol.append((x +1 , y +1 ))
+            stack.append((x+1 , y +1))
+        
+        #up-right
+        if isValidFloodFill(app, x -1 , y - 1, sol, target):
+             
+            # if valid, add to solution and stack
+            sol.append((x -1 , y -1 ))
+            stack.append((x - 1, y - 1))
+ 
+        #down-right
+        if isValidFloodFill(app, x +1, y -1, sol, target):
+             
+            # if valid, add to solution and stack
+            sol.append((x +1 , y -1 ))
+            stack.append((x +1 , y - 1))
+
+        #up-left
+        if isValidFloodFill(app, x -1, y +1, sol, target):
+             
+            # if valid, add to solution and stack
+            sol.append((x -1, y +1 ))
+            stack.append((x -1, y +1))
+
+    return sol
+
+def isValidFloodFill(app, row, col, sol, target):
     if ((row < 0) or (row >= app.rows) or
         (col < 0) or (col >= app.cols) or
         (app.board[row][col] != target) or 
         (row, col) in sol):
-        return sol
+        return False
+    return True
 
-    else:
-        sol.append((row, col))
-        floodFillHelper(app, row-1, col, target, sol) # up
-        floodFillHelper(app, row+1, col, target, sol) # down
-        floodFillHelper(app, row, col-1, target, sol) # left
-        floodFillHelper(app, row, col+1, target, sol) # right
-        floodFillHelper(app, row-1, col-1, target, sol) # up-left
-        floodFillHelper(app, row-1, col+1, target, sol) # up-right
-        floodFillHelper(app, row+1, col-1, target, sol) # down-right
-        floodFillHelper(app, row+1, col+1, target, sol) # down-left
 
-        if sol != []:
-            return sol
-        
+
 def findOptimal(app, possibleStart):
     sol = []
     best = None
