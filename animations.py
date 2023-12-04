@@ -16,7 +16,7 @@ def onAppStart(app):
     app.cellBorderWidth = 2
     app.centers = loadCenters(app)
     #what the target jelly is this round 
-    app.winningScore = 10000
+    app.winningScore = 19293299239
     onStart(app)
     loadImages(app)
     
@@ -28,7 +28,7 @@ def onStart(app):
     app.selected = []
     app.selectedPositions = []
     app.targetJelly = randint(1,6)
-    app.totalMoves = 20
+    app.totalMoves = 100
     app.userMoves = app.totalMoves
     app.userScore = 0
     app.hint =[]
@@ -38,6 +38,7 @@ def onStart(app):
     app.gameOver = False
     app.won = False
     app.canShuffle = False
+    app.striped = []
 
 def loadImages(app):
     #https://stock.adobe.com/images/Cartoon-grass-with-small-flowers-daisy-and-marigold.-Grass-field%2C-background/177790791
@@ -106,11 +107,11 @@ def onMouseRelease(app, mouseX, mouseY):
     #length is greater than or equal to 3
     else:
         
-        intial = app.board[app.selected[0][0]][app.selected[0][1]]
+        intial = app.board[app.selected[0][0]][app.selected[0][1]]%10
         
         for cx, cy in app.selected:
             
-            if app.board[cx][cy] != intial:
+            if app.board[cx][cy]%10 != intial:
                 for i in range(len(app.selected)-1 , -1, -1):
                     app.notSelected.insert(app.selectedPositions[i], app.selected.pop(i))
                 
@@ -124,8 +125,31 @@ def onMouseRelease(app, mouseX, mouseY):
             addScoreToOverall(app, app.selected)
 
             for row, col in app.selected:
+                #checks if is a striped jelly
+                print('entered for loop')
+                #if vertical jelly, take all jellies in that column
+                if app.board[row][col] > 10 and app.board[row][col]<20:
+                        print('hi im vertical')
+                        for horizontal in range(app.rows):
+                            if (horizontal, col) not in app.selected:
+                                app.userScore +=450
+                                app.board[horizontal][col] = 0
+                        
+                        
+                #if horizontal jelly, take all jellies in that row
+                elif app.board[row][col]>20:
+                        print('hi im horizontal')
+                        for vertical in range(app.cols):
+                            if (row, vertical) not in app.selected:
+                                app.userScore +=450
+                                app.board[row][vertical] = 0
+                            
+                
                 app.board[row][col] = 0
+            print('lmao')
             app.userMoves -=1
+            if len(app.selected)>=6:
+                makeStriped(app)
 
             for i in range(len(app.selected)-1 , -1, -1):
                     app.notSelected.insert(app.selectedPositions[i], app.selected.pop(i))
@@ -134,6 +158,18 @@ def onMouseRelease(app, mouseX, mouseY):
         isGameOver(app)
     
             
+def makeStriped(app):
+    newStriped = randint(0, len(app.notSelected))
+    if app.board[app.notSelected[newStriped][0]][app.notSelected[newStriped][1]] > 10:
+        print('no work!')
+        makeStriped(app)
+    else: 
+        print('fefuefwhufewuh')
+        val = randint(1,2)
+        if val == 1:
+            app.board[app.notSelected[newStriped][0]][app.notSelected[newStriped][1]] +=10
+        else: 
+            app.board[app.notSelected[newStriped][0]][app.notSelected[newStriped][1]] +=20
 
 
 def onMousePress(app, mouseX, mouseY):
@@ -171,8 +207,21 @@ def redrawAll(app):
             val = app.board[row][col]
             color = findColor(app, val)
             x, y = rowColToPixel(app, row, col)
-            drawCircle(x, y, (app.boardWidth//app.cols)//3, 
+            if val > 10 and val < 20:
+                drawCircle(x, y, (app.boardWidth//app.cols)//3, 
                        fill = color, border = 'black')
+                drawRect(x-((app.boardWidth//app.cols)//12), y - ((app.boardWidth//app.cols)//6), 
+                         (app.boardWidth//app.cols)//6, (app.boardWidth//app.cols)//3)
+            elif val>20:
+                drawCircle(x, y, (app.boardWidth//app.cols)//3, 
+                       fill = color, border = 'black')
+                drawRect(x- ((app.boardWidth//app.cols)//6), y - ((app.boardWidth//app.cols)//12), 
+                         (app.boardWidth//app.cols)//3, (app.boardWidth//app.cols)//6)
+            else: 
+                drawCircle(x, y, (app.boardWidth//app.cols)//3, 
+                       fill = color, border = 'black')
+
+
             
     
     drawOval(app.width/2, app.height*(1/20), app.width/4, app.height/5, 
@@ -211,22 +260,22 @@ def redrawAll(app):
 
 def findColor(app, val):
 
-    if val == 1:
+    if val %10 == 1:
         return 'purple'
     
-    elif val == 2:
+    elif val%10  == 2:
         return 'green'
     
-    elif val == 3:
+    elif val%10  == 3:
         return 'red'
     
-    elif val == 4:
+    elif val %10 == 4:
         return 'blue'
     
-    elif val == 5:
+    elif val %10 == 5:
         return 'yellow'
     
-    elif val == 6:
+    elif val %10 == 6:
         return 'orange'
     
 def makeColors(app):
@@ -299,7 +348,7 @@ def getHint(app):
         for row in range(app.rows):
             for col in range(app.cols):
                 if copyBoard[row][col] != 'seen':
-                    target = app.board[row][col] 
+                    target = app.board[row][col]%10 
                     curr = floodFill(app, row, col, target)
                     
                     
@@ -316,7 +365,7 @@ def getHint(app):
                     x,y = temp[0]
 
                     #current jelly is the target jelly
-                    if app.board[x][y] == app.targetJelly:
+                    if app.board[x][y]%10 == app.targetJelly:
                         if len(temp) + 1 > len(best):
                             best = temp
                             bestJelly = best[0]
@@ -426,7 +475,7 @@ def floodFill(app, row, col, target):
 def isValidFloodFill(app, row, col, sol, target):
     if ((row < 0) or (row >= app.rows) or
         (col < 0) or (col >= app.cols) or
-        (app.board[row][col] != target) or 
+        (app.board[row][col]%10 != target) or 
         (row, col) in sol):
         return False
     return True
