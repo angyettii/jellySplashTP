@@ -16,7 +16,7 @@ def onAppStart(app):
     app.cellBorderWidth = 2
     app.centers = loadCenters(app)
     #what the target jelly is this round 
-    app.winningScore = 19293299239
+    app.winningScore = 30000
     onStart(app)
     loadImages(app)
     
@@ -28,7 +28,7 @@ def onStart(app):
     app.selected = []
     app.selectedPositions = []
     app.targetJelly = randint(1,6)
-    app.totalMoves = 100
+    app.totalMoves = 20
     app.userMoves = app.totalMoves
     app.userScore = 0
     app.hint =[]
@@ -86,7 +86,11 @@ def loadImages(app):
     app.verticalImage = Image.open('images/vertical.png')
     app.verticalImage = CMUImage(app.verticalImage)
 
+    app.winImage = Image.open('images/win.png')
+    app.winImage = CMUImage(app.winImage)
 
+    app.loseImage = Image.open('images/lose.png')
+    app.loseImage = CMUImage(app.loseImage)
 
 def loadCenters(app):
     L = []
@@ -258,8 +262,9 @@ def redrawAll(app):
              fill = rgb(244, 206, 157), border = textColor, borderWidth = 10)
     drawLabel("Moves Left:", app.width/2, app.height*(1/28), size = 20, fill = rgb(97, 63, 19))
     drawLabel(f'{app.userMoves}', app.width/2, app.height*(1/12), size = 40)
-    drawLabel(f'Score: {int(app.userScore)}', app.width*3/20, app.height*1/22, size = 25)
-    drawLabel(f'target: {findColor(app, app.targetJelly)[1]}', app.width*3/20,app.height*1/10, size = 20)
+    drawLabel(f'Score: {int(app.userScore)}', app.width*3/20, app.height*1/25, size = 25)
+    drawLabel('target:', app.width*1/10,app.height*1/10, size = 20)
+    drawImage(findColor(app, app.targetJelly)[0], app.width*15/80,app.height*1/10, align = 'center')
 
     pilImage = app.lightbulbImage.image
     drawCircle(app.width*9/10, app.height/15, pilImage.height/45, fill = 'white', border = 'black', borderWidth = 2)
@@ -275,15 +280,17 @@ def redrawAll(app):
             rectColor = rgb(139, 209, 125)
             msg = (f'Congratulations, you scored {int(app.userScore)} and won!')
             retryColor = rgb(10, 107, 24)
+            lastPic = app.winImage
         else: 
             rectColor = rgb(227, 104, 79)
             msg = (f"Oh no, you've run out of moves! Your score was {int(app.userScore)}.")
             retryColor = rgb(194, 23, 17)
+            lastPic = app.loseImage
 
         drawRect(app.width/7, app.height/4, app.width*(5/7), app.height/2, fill = rectColor)
         drawLabel(msg, app.width/2, app.height/3, size = 20)
         drawLabel('Play Again?', app.width/2, app.height*(2/5), size = 25)
-        #import happy and sad image
+        drawImage(lastPic, app.width/2, app.height*(107/200), align = 'center')
         pilImage = app.retryImage.image
         drawCircle(app.width/2, app.height*(321/480), pilImage.width/5, fill = retryColor)
         drawImage(app.retryImage, app.width/2, app.height*(2/3), align='center', width = pilImage.width/3, height = pilImage.height/3)
