@@ -57,6 +57,36 @@ def loadImages(app):
     app.shuffleImage = Image.open('images/shuffle.png')
     app.shuffleImage = CMUImage(app.shuffleImage)
 
+    #all jelly illustrations done by me
+
+    app.blueJelly = Image.open('images/blueJelly.png')
+    app.blueJelly = CMUImage(app.blueJelly)
+
+    app.greenJelly = Image.open('images/greenJelly.png')
+    app.greenJelly = CMUImage(app.greenJelly)
+
+    app.yellowJelly = Image.open('images/yellowJelly.png')
+    app.yellowJelly = CMUImage(app.yellowJelly)
+
+    app.orangeJelly = Image.open('images/orangeJelly.png')
+    app.orangeJelly = CMUImage(app.orangeJelly)
+
+    app.redJelly = Image.open('images/redJelly.png')
+    app.redJelly = CMUImage(app.redJelly)
+
+    app.purpJelly = Image.open('images/purpJelly.png')
+    app.purpJelly = CMUImage(app.purpJelly)
+
+    app.emptyImage = Image.open('images/empty.png')
+    app.emptyImage = CMUImage(app.emptyImage)
+
+    app.horizontalImage = Image.open('images/horizontal.png')
+    app.horizontalImage = CMUImage(app.horizontalImage)
+
+    app.verticalImage = Image.open('images/vertical.png')
+    app.verticalImage = CMUImage(app.verticalImage)
+
+
 
 def loadCenters(app):
     L = []
@@ -161,10 +191,10 @@ def onMouseRelease(app, mouseX, mouseY):
 def makeStriped(app):
     newStriped = randint(0, len(app.notSelected))
     if app.board[app.notSelected[newStriped][0]][app.notSelected[newStriped][1]] > 10:
-        print('no work!')
+        
         makeStriped(app)
     else: 
-        print('fefuefwhufewuh')
+        
         val = randint(1,2)
         if val == 1:
             app.board[app.notSelected[newStriped][0]][app.notSelected[newStriped][1]] +=10
@@ -205,21 +235,21 @@ def redrawAll(app):
     for row in range(app.rows):
         for col in range(app.cols):
             val = app.board[row][col]
-            color = findColor(app, val)
+            image = findColor(app, val)[0]
             x, y = rowColToPixel(app, row, col)
+            #vertical
             if val > 10 and val < 20:
                 drawCircle(x, y, (app.boardWidth//app.cols)//3, 
-                       fill = color, border = 'black')
-                drawRect(x-((app.boardWidth//app.cols)//12), y - ((app.boardWidth//app.cols)//6), 
-                         (app.boardWidth//app.cols)//6, (app.boardWidth//app.cols)//3)
+                        border = 'black')
+                drawImage(image, x, y, align='center')
+                drawImage(app.verticalImage,x,y,align='center')
+            #horizontal
             elif val>20:
-                drawCircle(x, y, (app.boardWidth//app.cols)//3, 
-                       fill = color, border = 'black')
-                drawRect(x- ((app.boardWidth//app.cols)//6), y - ((app.boardWidth//app.cols)//12), 
-                         (app.boardWidth//app.cols)//3, (app.boardWidth//app.cols)//6)
+                drawImage(image, x, y, align='center')
+                drawImage(app.horizontalImage,x,y,align='center')
+            #normal
             else: 
-                drawCircle(x, y, (app.boardWidth//app.cols)//3, 
-                       fill = color, border = 'black')
+                drawImage(image, x, y, align='center')
 
 
             
@@ -229,7 +259,7 @@ def redrawAll(app):
     drawLabel("Moves Left:", app.width/2, app.height*(1/28), size = 20, fill = rgb(97, 63, 19))
     drawLabel(f'{app.userMoves}', app.width/2, app.height*(1/12), size = 40)
     drawLabel(f'Score: {int(app.userScore)}', app.width*3/20, app.height*1/22, size = 25)
-    drawLabel(f'target: {findColor(app, app.targetJelly)}', app.width*3/20,app.height*1/10, size = 20)
+    drawLabel(f'target: {findColor(app, app.targetJelly)[1]}', app.width*3/20,app.height*1/10, size = 20)
 
     pilImage = app.lightbulbImage.image
     drawCircle(app.width*9/10, app.height/15, pilImage.height/45, fill = 'white', border = 'black', borderWidth = 2)
@@ -258,25 +288,29 @@ def redrawAll(app):
         drawCircle(app.width/2, app.height*(321/480), pilImage.width/5, fill = retryColor)
         drawImage(app.retryImage, app.width/2, app.height*(2/3), align='center', width = pilImage.width/3, height = pilImage.height/3)
 
+
 def findColor(app, val):
 
     if val %10 == 1:
-        return 'purple'
+        return app.purpJelly, 'purple'
     
     elif val%10  == 2:
-        return 'green'
+        return app.greenJelly, 'green'
     
     elif val%10  == 3:
-        return 'red'
+        return app.redJelly, 'red'
     
     elif val %10 == 4:
-        return 'blue'
+        return app.blueJelly, 'blue'
     
     elif val %10 == 5:
-        return 'yellow'
+        return app.yellowJelly, 'yellow'
     
     elif val %10 == 6:
-        return 'orange'
+        return app.orangeJelly, 'orange'
+    
+    elif val == 0:
+        return app.emptyImage, 'nothing'
     
 def makeColors(app):
     
