@@ -19,6 +19,7 @@ def onAppStart(app):
     app.winningScore = 30000
     onStart(app)
     loadImages(app)
+    app.stepsPerSecond = 6
     
     
     
@@ -160,10 +161,10 @@ def onMouseRelease(app, mouseX, mouseY):
 
             for row, col in app.selected:
                 #checks if is a striped jelly
-                print('entered for loop')
+                
                 #if vertical jelly, take all jellies in that column
                 if app.board[row][col] > 10 and app.board[row][col]<20:
-                        print('hi im vertical')
+                        
                         for horizontal in range(app.rows):
                             if (horizontal, col) not in app.selected:
                                 app.userScore +=450
@@ -172,7 +173,7 @@ def onMouseRelease(app, mouseX, mouseY):
                         
                 #if horizontal jelly, take all jellies in that row
                 elif app.board[row][col]>20:
-                        print('hi im horizontal')
+                 
                         for vertical in range(app.cols):
                             if (row, vertical) not in app.selected:
                                 app.userScore +=450
@@ -180,7 +181,7 @@ def onMouseRelease(app, mouseX, mouseY):
                             
                 
                 app.board[row][col] = 0
-            print('lmao')
+           
             app.userMoves -=1
             if len(app.selected)>=6:
                 makeStriped(app)
@@ -190,10 +191,13 @@ def onMouseRelease(app, mouseX, mouseY):
         #checks if the game is over after every move
         app.showHint = False
         isGameOver(app)
+        print(app.board)
     
             
 def makeStriped(app):
-    newStriped = randint(0, len(app.notSelected))
+    newStriped = randint(0, len(app.notSelected)-1)
+    print(len(app.notSelected))
+    print(newStriped)
     if app.board[app.notSelected[newStriped][0]][app.notSelected[newStriped][1]] > 10:
         
         makeStriped(app)
@@ -236,8 +240,9 @@ def redrawAll(app):
         drawLine(x, y, nextX, nextY)
     
     makeColors(app)
-    for row in range(app.rows):
-        for col in range(app.cols):
+
+    for row in range(app.rows-1, -1, -1):
+        for col in range(app.cols-1, -1, -1):
             val = app.board[row][col]
             image = findColor(app, val)[0]
             x, y = rowColToPixel(app, row, col)
@@ -318,6 +323,9 @@ def findColor(app, val):
     
     elif val == 0:
         return app.emptyImage, 'nothing'
+    
+    elif val == None:
+        print('poop')
     
 def makeColors(app):
     
