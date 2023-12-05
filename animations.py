@@ -15,11 +15,10 @@ def onAppStart(app):
     app.boardTop = (1/6)*app.height
     app.cellBorderWidth = 2
     app.centers = loadCenters(app)
-    #what the target jelly is this round 
     app.winningScore = 300000
     onStart(app)
     loadImages(app)
-    app.stepsPerSecond = 6
+    app.stepsPerSecond = 9
     
     
     
@@ -28,6 +27,7 @@ def onStart(app):
     app.notSelected = app.centers
     app.selected = []
     app.selectedPositions = []
+    #what the target jelly is this round 
     app.targetJelly = randint(1,6)
     app.totalMoves = 40
     app.userMoves = app.totalMoves
@@ -40,6 +40,7 @@ def onStart(app):
     app.won = False
     app.canShuffle = False
     app.striped = []
+
 
 def loadImages(app):
     #https://stock.adobe.com/images/Cartoon-grass-with-small-flowers-daisy-and-marigold.-Grass-field%2C-background/177790791
@@ -92,6 +93,16 @@ def loadImages(app):
 
     app.loseImage = Image.open('images/lose.png')
     app.loseImage = CMUImage(app.loseImage)
+
+    #https://thenounproject.com/browse/icons/term/plus-sign/
+    app.plusImg = Image.open('images/plus.png')
+    app.plusImg = CMUImage(app.plusImg)
+
+    #https://pngimg.com/image/41010
+    app.minusImg = Image.open('images/minus.png')
+    app.minusImg = CMUImage(app.minusImg)
+
+
 
 def loadCenters(app):
     L = []
@@ -224,6 +235,24 @@ def onMousePress(app, mouseX, mouseY):
         pilImage = app.shuffleImage.image
         if distance(mouseX, app.width*3/4, mouseY, app.height/15) < pilImage.width/12:
             shuffle(app)
+        
+        changeFallSpeed(app, mouseX, mouseY)
+
+def changeFallSpeed(app, mouseX, mouseY):
+
+    if ((distance(mouseX, app.width/20, mouseY, app.height*7/10) < app.boardWidth//(app.rows*2)) and (app.stepsPerSecond < 28)):
+        
+        app.stepsPerSecond +=4
+       
+    
+    
+
+    if ((distance(mouseX, app.width/20, mouseY, app.height*8/10) < app.boardWidth//(app.rows*2)) and (app.stepsPerSecond > 4)):
+     
+        app.stepsPerSecond -=4
+        
+
+
 
 def redrawAll(app):
     pilImage = app.backgroundImage.image
@@ -263,7 +292,6 @@ def redrawAll(app):
 
 
             
-    
     drawOval(app.width/2, app.height*(1/20), app.width/4, app.height/5, 
              fill = rgb(244, 206, 157), border = textColor, borderWidth = 10)
     drawLabel("Moves Left:", app.width/2, app.height*(1/28), size = 20, fill = rgb(97, 63, 19))
@@ -280,6 +308,14 @@ def redrawAll(app):
     drawCircle(app.width*3/4, app.height/15, pilImage.width/12, fill = 'white', border = 'black', borderWidth = 2)
     drawImage(app.shuffleImage, app.width*3/4, app.height/15, align='center', width = pilImage.width/8, height = pilImage.height/8)
 
+    drawCircle(app.width/20, app.height*7/10, app.boardWidth//(app.rows*2), fill = 'white', border = 'black')
+    pilImage = app.plusImg.image
+    drawImage(app.plusImg, app.width/20, app.height*7/10, align = 'center', width = pilImage.width/4, height = pilImage.height/4)
+    
+    drawCircle(app.width/20, app.height*8/10, app.boardWidth//(app.rows*2), fill = 'white', border = 'black')
+    pilImage = app.minusImg.image
+    drawImage(app.minusImg, app.width/20, app.height*8/10, align = 'center', width = pilImage.width/25, height = pilImage.height/25)
+    
     if app.gameOver == True:
         drawRect(0, 0, app.width, app.height, fill = rgb(157, 135, 168), opacity = 78)
         if app.won == True:
