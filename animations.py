@@ -16,7 +16,7 @@ def onAppStart(app):
     app.cellBorderWidth = 2
     app.centers = loadCenters(app)
     #what the target jelly is this round 
-    app.winningScore = 30000
+    app.winningScore = 300000
     onStart(app)
     loadImages(app)
     app.stepsPerSecond = 6
@@ -29,7 +29,7 @@ def onStart(app):
     app.selected = []
     app.selectedPositions = []
     app.targetJelly = randint(1,6)
-    app.totalMoves = 20
+    app.totalMoves = 40
     app.userMoves = app.totalMoves
     app.userScore = 0
     app.hint =[]
@@ -191,14 +191,14 @@ def onMouseRelease(app, mouseX, mouseY):
         #checks if the game is over after every move
         app.showHint = False
         isGameOver(app)
-        print(app.board)
+        
     
             
 def makeStriped(app):
     newStriped = randint(0, len(app.notSelected)-1)
-    print(len(app.notSelected))
-    print(newStriped)
-    if app.board[app.notSelected[newStriped][0]][app.notSelected[newStriped][1]] > 10:
+    
+    if ((app.board[app.notSelected[newStriped][0]][app.notSelected[newStriped][1]] > 10) or 
+    (app.board[app.notSelected[newStriped][0]][app.notSelected[newStriped][1]] == 0)):
         
         makeStriped(app)
     else: 
@@ -241,9 +241,10 @@ def redrawAll(app):
     
     makeColors(app)
 
-    for row in range(app.rows-1, -1, -1):
-        for col in range(app.cols-1, -1, -1):
+    for row in range(app.rows):
+        for col in range(app.cols):
             val = app.board[row][col]
+          
             image = findColor(app, val)[0]
             x, y = rowColToPixel(app, row, col)
             #vertical
@@ -323,9 +324,7 @@ def findColor(app, val):
     
     elif val == 0:
         return app.emptyImage, 'nothing'
-    
-    elif val == None:
-        print('poop')
+
     
 def makeColors(app):
     
