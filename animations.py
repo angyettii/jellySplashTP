@@ -15,7 +15,7 @@ def onAppStart(app):
     app.boardTop = (1/6)*app.height
     app.cellBorderWidth = 2
     app.centers = loadCenters(app)
-    app.winningScore = 300000
+    app.winningScore = 40000
     onStart(app)
     loadImages(app)
     app.stepsPerSecond = 9
@@ -29,7 +29,7 @@ def onStart(app):
     app.selectedPositions = []
     #what the target jelly is this round 
     app.targetJelly = randint(1,6)
-    app.totalMoves = 40
+    app.totalMoves = 20
     app.userMoves = app.totalMoves
     app.userScore = 0
     app.hint =[]

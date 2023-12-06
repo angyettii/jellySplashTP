@@ -1,7 +1,13 @@
 from cmu_graphics import *
-from animations import *
 from random import randint
 import copy
+from PIL import Image
+from starting import *
+from hint import *
+from shuffle import *
+
+
+
 
 def onMouseDrag(app, mouseX, mouseY):
 
@@ -90,6 +96,23 @@ def onMouseRelease(app, mouseX, mouseY):
         app.showHint = False
         isGameOver(app)
         
+    
+            
+def makeStriped(app):
+    newStriped = randint(0, len(app.notSelected)-1)
+    
+    if ((app.board[app.notSelected[newStriped][0]][app.notSelected[newStriped][1]] > 10) or 
+    (app.board[app.notSelected[newStriped][0]][app.notSelected[newStriped][1]] == 0)):
+        
+        makeStriped(app)
+    else: 
+        
+        val = randint(1,2)
+        if val == 1:
+            app.board[app.notSelected[newStriped][0]][app.notSelected[newStriped][1]] +=10
+        else: 
+            app.board[app.notSelected[newStriped][0]][app.notSelected[newStriped][1]] +=20
+
 
 def onMousePress(app, mouseX, mouseY):
    
@@ -105,9 +128,26 @@ def onMousePress(app, mouseX, mouseY):
         pilImage = app.shuffleImage.image
         if distance(mouseX, app.width*3/4, mouseY, app.height/15) < pilImage.width/12:
             shuffle(app)
+        
+        changeFallSpeed(app, mouseX, mouseY)
+
+def changeFallSpeed(app, mouseX, mouseY):
+
+    if ((distance(mouseX, app.width/20, mouseY, app.height*7/10) < app.boardWidth//(app.rows*2)) and (app.stepsPerSecond < 28)):
+        
+        app.stepsPerSecond +=4
+       
+    
+    
+
+    if ((distance(mouseX, app.width/20, mouseY, app.height*8/10) < app.boardWidth//(app.rows*2)) and (app.stepsPerSecond > 4)):
+     
+        app.stepsPerSecond -=4
+        
+
+
 
 def redrawAll(app):
-   
     pilImage = app.backgroundImage.image
     drawImage(app.backgroundImage, app.width/2, app.height/2, align='center', width = pilImage.width*(4/3), height = pilImage.height*(4/3))
     
@@ -123,9 +163,10 @@ def redrawAll(app):
     
     makeColors(app)
 
-    for row in range(app.rows-1, -1, -1):
-        for col in range(app.cols-1, -1, -1):
+    for row in range(app.rows):
+        for col in range(app.cols):
             val = app.board[row][col]
+          
             image = findColor(app, val)[0]
             x, y = rowColToPixel(app, row, col)
             #vertical
@@ -144,7 +185,6 @@ def redrawAll(app):
 
 
             
-    
     drawOval(app.width/2, app.height*(1/20), app.width/4, app.height/5, 
              fill = rgb(244, 206, 157), border = textColor, borderWidth = 10)
     drawLabel("Moves Left:", app.width/2, app.height*(1/28), size = 20, fill = rgb(97, 63, 19))
@@ -161,6 +201,14 @@ def redrawAll(app):
     drawCircle(app.width*3/4, app.height/15, pilImage.width/12, fill = 'white', border = 'black', borderWidth = 2)
     drawImage(app.shuffleImage, app.width*3/4, app.height/15, align='center', width = pilImage.width/8, height = pilImage.height/8)
 
+    drawCircle(app.width/20, app.height*7/10, app.boardWidth//(app.rows*2), fill = 'white', border = 'black')
+    pilImage = app.plusImg.image
+    drawImage(app.plusImg, app.width/20, app.height*7/10, align = 'center', width = pilImage.width/4, height = pilImage.height/4)
+    
+    drawCircle(app.width/20, app.height*8/10, app.boardWidth//(app.rows*2), fill = 'white', border = 'black')
+    pilImage = app.minusImg.image
+    drawImage(app.minusImg, app.width/20, app.height*8/10, align = 'center', width = pilImage.width/25, height = pilImage.height/25)
+    
     if app.gameOver == True:
         drawRect(0, 0, app.width, app.height, fill = rgb(157, 135, 168), opacity = 78)
         if app.won == True:
@@ -183,14 +231,89 @@ def redrawAll(app):
         drawImage(app.retryImage, app.width/2, app.height*(2/3), align='center', width = pilImage.width/3, height = pilImage.height/3)
 
 
+def drawGrid(app):
+    cellWidth = app.boardWidth//app.cols
+    cellHeight = app.boardHeight//app.rows
+    for row in range(app.rows):
+        for col in range(app.cols):
+           
+            if (row,col) in app.selected:
+                color = rgb(255, 236, 204)
+
+            elif(row,col) in app.hint:
+                color = rgb(137, 197, 240)
+
+            elif abs(row-col)%2 == 0:
+                color = rgb(222,172,120)
+
+            else:
+                color = rgb(234,192,150)
+          
+            x = app.boardLeft + col*cellHeight
+            y = app.boardTop + row*cellWidth
+            drawRect(x, y, cellWidth, cellHeight, 
+                     fill = color)
+
+
+             
+def rowColToPixel(app, row, col):
+    cellWidth = app.boardWidth//app.cols
+    cellHeight = app.boardWidth//app.rows
+    return (cellWidth*col + cellWidth //2 + app.boardLeft, 
+            cellHeight*row + cellHeight // 2 + app.boardTop)
+ 
+
+
 def onStep(app):
     dropDown(app)
     getHint(app)
     
+def distance(x1, x2, y1, y2):
+    return ((x1-x2)**2 + (y1-y2)**2)**.5
 
+#adds score to user score
+def addScoreToOverall(app, popped):
+    #bonus for popping target jelly
+    x,y = popped[0]
+    if app.board[x][y] == app.targetJelly:
+            multiplier = 1.5
+    else:
+            multiplier = 1
+
+    #memoization
+    if len(popped) in app.scores:
+        addedScore = app.scores[len(popped)] 
+    
+    else: addedScore = calculateScore(app, len(popped))
+
+    app.userScore += addedScore * multiplier
+
+
+#calculates score, each jelly popped gives 20% increase in score
+def calculateScore(app, length):
+    
+     #base case
+    if length == 3: 
+        
+        return 600
+
+    #recurse
+    else:    
+        #each jelly popped adds 20% to the score
+        app.scores[length] = 6/5 * calculateScore(app, length-1)
+        return app.scores[length]
+          
+            
+def isGameOver(app):
+    if app.userScore >= app.winningScore:
+        app.won = True
+        app.gameOver = True
+
+
+    elif app.userMoves <= 0 :
+        app.gameOver = True
 
 def main():
     runApp()
 
 main()
-
