@@ -2,6 +2,7 @@ from cmu_graphics import *
 from random import randint
 import copy
 from PIL import Image
+from userClass import *
 
 
 def onAppStart(app):
@@ -91,16 +92,14 @@ def onStart(app):
     #what the target jelly is this round 
     app.targetJelly = randint(1,6)
     app.totalMoves = 20
-    app.userMoves = app.totalMoves
     app.userScore = 0
     app.hint =[]
     app.showHint =False
     app.scores = dict()
     app.showHintTest = False
-    app.gameOver = False
-    app.won = False
     app.canShuffle = False
     app.striped = []
+    player = user(0, app.totalMoves)
 
 
 def loadCenters(app):

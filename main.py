@@ -94,7 +94,7 @@ def onMouseRelease(app, mouseX, mouseY):
                     app.notSelected.insert(app.selectedPositions[i], app.selected.pop(i))
         #checks if the game is over after every move
         app.showHint = False
-        isGameOver(app)
+        isGameOver(app.winningScore)
         
     
             
@@ -153,6 +153,7 @@ def redrawAll(app):
     
     textColor = rgb(163, 99, 3)
     drawRect(app.width*1/10, app.height*31/224, app.width*4/5, app.height*4/5, fill = textColor)
+    
     drawGrid(app)
     
     for i in range(len(app.selected)-1):
