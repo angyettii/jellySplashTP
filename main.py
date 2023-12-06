@@ -158,13 +158,13 @@ def makeInstructions(app):
     if app.showInstructions == True:
         #cover/background
         drawRect(0, 0, app.width, app.height, fill = rgb(199, 171, 137), opacity = 60)
-        drawRect(app.width/7, app.height/5, app.width*(5/7), app.height*2/3, fill = rgb(186, 139, 91), border = rgb(77, 45, 8), borderWidth = 4)
+        drawRect(app.width/10, app.height/5, app.width*(4/5), app.height*2/3, fill = rgb(186, 139, 91), border = rgb(77, 45, 8), borderWidth = 4)
         
         #general game info
         info = app.infoImg.image
         drawImage(app.infoImg, app.width*9/24, app.height/4,align = 'center', width = info.width/3, height = info.height/3)
         drawLabel('How to Play:', app.width*51/96, app.height/4, size = 30, bold = True)
-        drawLabel('Match 3 or more of the same color jelly to pop them!', app.width*1/2, app.height*13/40, size = 20)
+        drawLabel('Drag your mouse over 3 or more of the same color jelly to pop them!', app.width*1/2, app.height*13/40, size = 20)
         drawLabel('The more jellies connected in a match, the higher the score!', app.width*1/2, app.height*3/8, size = 20)
         
         #hint info
@@ -195,7 +195,7 @@ def makeInstructions(app):
 
         #x-out
         xImage = app.xImg.image
-        drawImage(app.xImg, app.width*45/56, app.height/4, align = 'center', width = xImage.width/16, height = xImage.height/16)
+        drawImage(app.xImg, app.width*47/56, app.height*41/160, align = 'center', width = xImage.width/16, height = xImage.height/16)
 
         
 #returns pixel location of the center of each row col pair
@@ -317,7 +317,7 @@ def onMousePress(app, mouseX, mouseY):
         #x out button clickable if instructions are showing
         if app.showInstructions == True:
             xImage = app.xImg.image
-            if distance(mouseX, app.width*45/56, mouseY, app.height/4) < xImage.width/30:
+            if distance(mouseX,  app.width*47/56, mouseY, app.height*41/160) < xImage.width/30:
                 app.showInstructions = not app.showInstructions
 
         else:
