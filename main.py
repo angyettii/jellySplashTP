@@ -408,6 +408,11 @@ def calculateScore(app, length):
 def distance(x1, x2, y1, y2):
     return ((x1-x2)**2 + (y1-y2)**2)**.5
 
+#restart if press 'r' key
+def onKeyPress(app, key):
+     if key == 'r':
+          onStart(app)
+
 
 def main():
     runApp()
