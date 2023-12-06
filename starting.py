@@ -1,6 +1,5 @@
 from cmu_graphics import *
 from random import randint
-import copy
 from PIL import Image
 from userClass import *
 

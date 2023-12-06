@@ -1,7 +1,6 @@
 from cmu_graphics import *
 from random import randint
 import copy
-from PIL import Image
 
 #check if there exists a possible match
 def solExists(board):
