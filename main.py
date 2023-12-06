@@ -67,9 +67,9 @@ def redrawAll(app):
     drawImage(app.lightbulbImage, app.width*33/40, app.height/15, align='center', width = lightbulb.width/18, height = lightbulb.height/18)
 
     #shuffle button
-    shuffle = app.shuffleImage.image
-    drawCircle(app.width*7/10, app.height/15, shuffle.width/12, fill = 'white', border = 'black', borderWidth = 2)
-    drawImage(app.shuffleImage, app.width*7/10, app.height/15, align='center', width = shuffle.width/8, height = shuffle.height/8)
+    shuffleButton = app.shuffleImage.image
+    drawCircle(app.width*7/10, app.height/15, shuffleButton.width/12, fill = 'white', border = 'black', borderWidth = 2)
+    drawImage(app.shuffleImage, app.width*7/10, app.height/15, align='center', width = shuffleButton.width/8, height = shuffleButton.height/8)
 
     #falling speed counter
     drawLabel('Falling', app.width/20, app.height*45/80, size = 18)
@@ -329,8 +329,8 @@ def onMousePress(app, mouseX, mouseY):
             if distance(mouseX, app.width*33/40, mouseY, app.height/15) < lightbulb.height/45:
                 app.showHint = not app.showHint
             
-            shuffle = app.shuffleImage.image
-            if distance(mouseX, app.width*7/10, mouseY, app.height/15) < shuffle.width/12:
+            shuffleIcon = app.shuffleImage.image
+            if distance(mouseX, app.width*7/10, mouseY, app.height/15) < shuffleIcon.width/12:
                 shuffle(app)
 
             
