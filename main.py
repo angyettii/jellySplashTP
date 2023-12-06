@@ -5,13 +5,14 @@ from PIL import Image
 from starting import *
 from hint import *
 from shuffle import *
+from userClass import *
 
 
 
 
 def onMouseDrag(app, mouseX, mouseY):
 
-    if app.gameOver == False:
+    if app.player.gameOver == False:
         count = 0
         while count < len(app.notSelected):
             #if distance from a center is less than radius, that circle is selected 
@@ -71,7 +72,7 @@ def onMouseRelease(app, mouseX, mouseY):
                         
                         for horizontal in range(app.rows):
                             if (horizontal, col) not in app.selected:
-                                app.userScore +=450
+                                app.player.score +=450
                                 app.board[horizontal][col] = 0
                         
                         
@@ -80,13 +81,13 @@ def onMouseRelease(app, mouseX, mouseY):
                  
                         for vertical in range(app.cols):
                             if (row, vertical) not in app.selected:
-                                app.userScore +=450
+                                app.player.score +=450
                                 app.board[row][vertical] = 0
                             
                 
                 app.board[row][col] = 0
            
-            app.userMoves -=1
+            app.player.moves -=1
             if len(app.selected)>=6:
                 makeStriped(app)
 
@@ -94,7 +95,8 @@ def onMouseRelease(app, mouseX, mouseY):
                     app.notSelected.insert(app.selectedPositions[i], app.selected.pop(i))
         #checks if the game is over after every move
         app.showHint = False
-        isGameOver(app.winningScore)
+
+        app.player.isGameOver(app, app.winningScore)
         
     
             
@@ -116,7 +118,7 @@ def makeStriped(app):
 
 def onMousePress(app, mouseX, mouseY):
    
-    if app.gameOver == True: 
+    if app.player.gameOver == True: 
         pilImage = app.retryImage.image
         if distance(mouseX, app.width/2, mouseY, app.height*(2/3)) < pilImage.width/5:
             onStart(app)
@@ -189,8 +191,8 @@ def redrawAll(app):
     drawOval(app.width/2, app.height*(1/20), app.width/4, app.height/5, 
              fill = rgb(244, 206, 157), border = textColor, borderWidth = 10)
     drawLabel("Moves Left:", app.width/2, app.height*(1/28), size = 20, fill = rgb(97, 63, 19))
-    drawLabel(f'{app.userMoves}', app.width/2, app.height*(1/12), size = 40)
-    drawLabel(f'Score: {int(app.userScore)}', app.width*3/20, app.height*1/25, size = 25)
+    drawLabel(f'{app.player.moves}', app.width/2, app.height*(1/12), size = 40)
+    drawLabel(f'Score: {int(app.player.score)}', app.width*3/20, app.height*1/25, size = 25)
     drawLabel('target:', app.width*1/10,app.height*1/10, size = 20)
     drawImage(findColor(app, app.targetJelly)[0], app.width*15/80,app.height*1/10, align = 'center')
 
@@ -210,16 +212,16 @@ def redrawAll(app):
     pilImage = app.minusImg.image
     drawImage(app.minusImg, app.width/20, app.height*8/10, align = 'center', width = pilImage.width/25, height = pilImage.height/25)
     
-    if app.gameOver == True:
+    if app.player.gameOver == True:
         drawRect(0, 0, app.width, app.height, fill = rgb(157, 135, 168), opacity = 78)
-        if app.won == True:
+        if app.player.won == True:
             rectColor = rgb(139, 209, 125)
-            msg = (f'Congratulations, you scored {int(app.userScore)} and won!')
+            msg = (f'Congratulations, you scored {int(app.player.score)} and won!')
             retryColor = rgb(10, 107, 24)
             lastPic = app.winImage
         else: 
             rectColor = rgb(227, 104, 79)
-            msg = (f"Oh no, you've run out of moves! Your score was {int(app.userScore)}.")
+            msg = (f"Oh no, you've run out of moves! Your score was {int(app.player.score)}.")
             retryColor = rgb(194, 23, 17)
             lastPic = app.loseImage
 
@@ -287,7 +289,7 @@ def addScoreToOverall(app, popped):
     
     else: addedScore = calculateScore(app, len(popped))
 
-    app.userScore += addedScore * multiplier
+    app.player.score += addedScore * multiplier
 
 
 #calculates score, each jelly popped gives 20% increase in score
@@ -305,14 +307,14 @@ def calculateScore(app, length):
         return app.scores[length]
           
             
-def isGameOver(app):
-    if app.userScore >= app.winningScore:
-        app.won = True
-        app.gameOver = True
+# def isGameOver(app):
+#     if app.player.score >= app.winningScore:
+#         app.won = True
+#         app.player.gameOver = True
 
 
-    elif app.userMoves <= 0 :
-        app.gameOver = True
+#     elif app.player.moves <= 0 :
+#         app.player.gameOver = True
 
 def main():
     runApp()
