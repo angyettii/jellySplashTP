@@ -14,4 +14,6 @@ Hint (lightbulb icon) - will highlight the best connection that you can make (hi
 Shuffle (switching icon) - will shuffle the current contents of the board, so the contents of the board are the same, but positions are different.
 Make falling speed higher/lower (plus/minus) - will make the speed that jellies fall higher or lower when pressing the plus or minus sign respectively.
 Instructions (i icon) - will bring up instructions when pressed.
-Retry button - 
+Retry - press 'r' to restart your game.
+
+There are no extra fonts needed to install.
