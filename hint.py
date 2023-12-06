@@ -6,6 +6,7 @@ from PIL import Image
 def getHint(app):
     if app.showHint == True:
         
+        #copy of board keeps track of what indexes have been check already
         copyBoard = copy.deepcopy(app.board)
         best = []
         bestJelly = None
@@ -15,6 +16,7 @@ def getHint(app):
             for col in range(app.cols):
                 if copyBoard[row][col] != 'seen':
                     target = app.board[row][col]%10 
+                    #flood fill for each color 'block'
                     curr = floodFill(app, row, col, target)
                     
                     
@@ -138,6 +140,9 @@ def floodFill(app, row, col, target):
 
     return sol
 
+#is valid if cell is on the board, the jelly within cell is 
+# the same color as the rest, and it hasn't already been added 
+# to the solution
 def isValidFloodFill(app, row, col, sol, target):
     if ((row < 0) or (row >= app.rows) or
         (col < 0) or (col >= app.cols) or
@@ -146,11 +151,26 @@ def isValidFloodFill(app, row, col, sol, target):
         return False
     return True
 
+#finds best path within color 'block'
+def compareWithinFill(app, possible):
+    best = []
+   
+    # finds path from each jelly in possible
+    currPath = findOptimal(app, possible)
+        #best check
+        
+    if best == [] or len(currPath) > len(best):
+        best = currPath 
+        
 
+   
+    return best
 
+#starting from the length of the selected jellies and decrementing 
+# by 1 if a solution not found for that length, finds a path that 
+# is the largest possible number 
 def findOptimal(app, possibleStart):
     sol = []
-    best = None
     
     copyPossibleStart = copy.deepcopy(possibleStart)
 
@@ -160,12 +180,12 @@ def findOptimal(app, possibleStart):
         if  tryingCurr != None:
             return tryingCurr
 
-#only finding first
+
 def findOptimalHelper(app, possible, sol, max):
     if len(sol) == max:
         return sol
     
-    #returning too early, not exploring all options
+   
     else:
         for i in range(0, len(possible)):
             
@@ -186,7 +206,9 @@ def isValidOptimal(app, row, col, sol):
     
     else: 
         prevRow, prevCol = sol[-1]
+        
         #in neighboring cells or already in solution
+        
         if ((((prevRow+1, prevCol) == (row,col)) or ((prevRow-1, prevCol) == (row,col)) or 
             ((prevRow, prevCol+1) == (row,col)) or ((prevRow, prevCol-1) == (row,col)) or 
             ((prevRow+1, prevCol+1) == (row,col)) or ((prevRow-1, prevCol-1) == (row,col)) or 
@@ -196,17 +218,5 @@ def isValidOptimal(app, row, col, sol):
         else:
             return False
             
-def compareWithinFill(app, possible):
-    best = []
-   
-    # finds path from each jelly in possible
-    currPath = findOptimal(app, possible)
-        #best check
-        
-    if best == [] or len(currPath) > len(best):
-        best = currPath 
-        # possible.insert(i, possible.pop(0))
 
-   
-    return best
 

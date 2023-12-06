@@ -1,6 +1,7 @@
 from random import randint
 import copy
 
+#check if there exists a possible match
 def solExists(board):
     for row in range(len(board)):
             for col in range(len(board[0])):
@@ -13,7 +14,6 @@ def solExists(board):
 
 
 def solExistsHelper(board, row, col, sol):
-    #check if there exists a possible match
     if len(sol) >= 3:
         return True
     

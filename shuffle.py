@@ -3,6 +3,7 @@ from random import randint
 import copy
 from PIL import Image
 
+#check if there exists a possible match
 def solExists(board):
     for row in range(len(board)):
             for col in range(len(board[0])):
@@ -15,7 +16,7 @@ def solExists(board):
 
 
 def solExistsHelper(board, row, col, sol):
-    #check if there exists a possible match
+    
     if len(sol) >= 3:
         return True
     
@@ -63,10 +64,11 @@ def shuffle(app):
    
 
 def shuffleHelper(app, newBoard, boardContents):
-    if findUnshuffled(app, newBoard) == 'not shuffled':
+    if findUnshuffled(app, newBoard) == 'shuffled':
         return 
     
     else:
+        #gives random value from the board contents
         row, col = findUnshuffled(app, newBoard)
         index = randint(0,len(boardContents) - 1)
         newBoard[row][col] = boardContents[index]
@@ -74,7 +76,8 @@ def shuffleHelper(app, newBoard, boardContents):
         shuffleHelper(app, newBoard, boardContents)
         
 
-
+#finds cells that don't have a new value yet, if can't find one, 
+# the board is shuffled already
 def findUnshuffled(app, newBoard):
     for row in range(app.rows):
         for col in range(app.cols):
@@ -82,7 +85,7 @@ def findUnshuffled(app, newBoard):
                 
                 return row, col
     
-    return 'not shuffled'
+    return 'shuffled'
 
 #csacademy 7.8 exercise 
 def flatten(L):

@@ -19,7 +19,8 @@ def onAppStart(app):
     app.winningScore = 40000
     onStart(app)
     loadImages(app)
-    app.stepsPerSecond = 9
+    app.stepsPerSecond = 13
+    app.showInstructions = True
     
 
 def loadImages(app):
@@ -82,22 +83,31 @@ def loadImages(app):
     app.minusImg = Image.open('images/minus.png')
     app.minusImg = CMUImage(app.minusImg)
 
+    #https://thenounproject.com/browse/icons/term/information/
+    app.infoImg = Image.open('images/info.png')
+    app.infoImg = CMUImage(app.infoImg)
+
+    #https://www.iconfinder.com/icons/2337861/close_close_button_exit_quit_x_icon
+    app.xImg = Image.open('images/x.webp')
+    app.xImg = CMUImage(app.xImg)
+
     
-    
+#reset each new game
 def onStart(app):
     app.board = [([None] * app.cols) for row in range(app.rows)]
     app.notSelected = app.centers
     app.selected = []
+    
+    #keeps app.notSelected ordered when inserting back
     app.selectedPositions = []
+    
     #what the target jelly is this round 
     app.targetJelly = randint(1,6)
+    
     app.totalMoves = 20
     app.hint =[]
-    app.showHint =False
+    app.showHint = False
     app.scores = dict()
-    app.showHintTest = False
-    app.canShuffle = False
-    app.striped = []
     app.player = user(0, app.totalMoves)
 
 
@@ -109,55 +119,6 @@ def loadCenters(app):
             L.append((x,y))
     return L
 
-def findColor(app, val):
-
-    if val %10 == 1:
-        return app.purpJelly, 'purple'
-    
-    elif val%10  == 2:
-        return app.greenJelly, 'green'
-    
-    elif val%10  == 3:
-        return app.redJelly, 'red'
-    
-    elif val %10 == 4:
-        return app.blueJelly, 'blue'
-    
-    elif val %10 == 5:
-        return app.yellowJelly, 'yellow'
-    
-    elif val %10 == 6:
-        return app.orangeJelly, 'orange'
-    
-    elif val == 0:
-        return app.emptyImage, 'nothing'
-
-    
-def makeColors(app):
-    
-    for row in range(app.rows):
-        for col in range(app.cols):
-            if app.board[row][col] == None:
-                color = randint(1,6) 
-                app.board[row][col] = color
-
-def dropDown(app):
-
-    #'falling'   
-    
-    for row in range (app.rows-1,-1,-1):
-        for col in range(app.cols):
-            if app.board[row][col] == 0 and row != 0:
-                    app.board[row][col] = app.board[row-1][col]
-                    app.board[row-1][col] = 0
-
-            elif app.board[row][col] == 0 and row == 0:
-                    app.board[row][col] = None
 
 
-def rowColToPixel(app, row, col):
-    cellWidth = app.boardWidth//app.cols
-    cellHeight = app.boardWidth//app.rows
-    return (cellWidth*col + cellWidth //2 + app.boardLeft, 
-            cellHeight*row + cellHeight // 2 + app.boardTop)
  
