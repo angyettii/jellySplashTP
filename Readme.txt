@@ -1,11 +1,10 @@
 Jelly Splash 112
 
-Jelly Splash 112 is a game where you connect 3 or more of the same 
-color jellies to reach the target score of 40,000 (changeable). There are a limited number of moves you can make, so try to maximize the number of jellies you match! 
+Jelly Splash 112 is a game where you connect 3 or more of the same color jellies to reach the target score. There are a limited number of moves you can make, so try to maximize the number of jellies you match! 
 
 Make sure to save all .py files, and run main.py to play the game.
 
-Must have CMU graphics and PIL (only need image) downloaded, here are the links to download them:
+Must have CMU graphics and PIL downloaded, here are the links to download them:
 CMU graphics: https://www.cs.cmu.edu/~112/notes/hw7.html
 PIL: https://pillow.readthedocs.io/en/stable/installation.html
 
